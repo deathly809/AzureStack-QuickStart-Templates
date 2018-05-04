@@ -5,36 +5,62 @@
     "parameters": {
         "clusterName": {
             "type": "string",
-            "defaultValue": "hadoop",
             "metadata": {
-                "description": "Name of the hadoop cluster.  Used as part of the name of each VM in the cluster."
+                "description": "Name of the hadoop cluster.  This must be a unique value."
             }
         },
         "adminUsername": {
             "type": "string",
+            "defaultValue": "localadmin",
             "metadata": {
-                "description": "Username for the Virtual Machine controller."
-            },
-            "defaultValue": "localadmin"
+                "description": "Username for the deployed virtual machines."
+            }
         },
         "adminPassword": {
             "type": "securestring",
             "metadata": {
-                "description": "Password for the Virtual Machine."
+                "description": "Password for the deployed virtual machines."
             }
         },
-        "vmSize": {
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Storage account type."
+            }
+        },
+        "masterNodeVMSize": {
+            "type": "string",
+            "defaultValue": "Standard_A4",
+            "allowedValues": [
+                "Standard_A4",
+                "Standard_A5",
+                "Standard_A6",
+                "Standard_A7"
+            ],
+            "metadata": {
+                "description": "The size of the virtual machine master nodes."
+            }
+        },
+        "workerNodeVMSize": {
             "type": "string",
             "defaultValue": "Standard_DS3_v2",
-            "metadata": {
-                "description": "The size of the Virtual Machine workers."
-            },
             "allowedValues": [
                 "Standard_DS3_v2",
                 "Standard_DS4_v2"
-            ]
+            ],
+            "metadata": {
+                "description": "The size of the Virtual Machine worker nodes."
+            }
         },
-        "clusterSize": {
+        "numberWorkerNodes": {
             "type": "int",
             "defaultValue": 4,
             "minValue": 1,
@@ -60,25 +86,21 @@
     },
     "variables": {
         "defaultName": "[parameters('clusterName')]",
+        "location": "[resourceGroup().location]",
         "dnsNameForPublicIP": "[parameters('clusterName')]",
-        "publicIPAddressName": "[variables('defaultName')]",
+        "publicIPAddressName": "[concat(variables('defaultName'),'pubip')]",
         "publicIPAddressType": "Dynamic",
         "addressPrefix": "10.0.0.0/16",
-        "subnetPrefix": "10.0.0.0/16",
-        "subnetName": "[variables('defaultName')]",
-        "storageAccountName": "[variables('defaultName')]",
+        "storageAccountName": "[tolower(concat(variables('defaultName'),'sa'))]",
+        "networkSecurityGroupName": "[tolower(concat(variables('defaultName'),'nsg'))]",
+        "subnetName": "[concat(variables('defaultName'),'sub')]",
+        "virtualNetworkName": "[concat(variables('defaultName'),'vnet')]",
+        "loadBalancerName": "[concat(variables('defaultName'),'lb')]",
         "storageAccountType": "Standard_LRS",
-        "virtualNetworkName": "[variables('defaultName')]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "networkSecurityGroupName": "[tolower(variables('defaultName'))]",
-        "masters": [
-            "NameNode",
-            "ResourceManager",
-            "WebAppProxy",
-            "MapReduceJobHistory"
-        ],
-        "numberMasters": "[length(variables('masters'))]"
+        "jumpBoxIpPrefix": "10.0.0.",
+        "masterIpPrefix": "10.0.1.",
+        "workerIpPrefix": "10.0.2.",
+        "baseURI": "TODO"
     },
     "resources": [
         {
@@ -107,7 +129,7 @@
                     {
                         "name": "[variables('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[variables('subnetPrefix')]"
+                            "addressPrefix": "[variables('addressPrefix')]"
                         }
                     }
                 ]
@@ -125,7 +147,7 @@
                     "domainNameLabel": "[tolower(variables('dnsNameForPublicIP'))]"
                 }
             }
-        }
+        },
         {
             "comments": "Network security group for the network.",
             "apiVersion": "2015-06-15",
@@ -137,12 +159,68 @@
                     {
                         "name": "ssh",
                         "properties": {
-                            "description": "Allow remote connection using SSH.",
+                            "description": "Allow remote connection using SSH to the jump node.",
                             "protocol": "Tcp",
                             "sourcePortRange": "*",
                             "destinationPortRange": "22",
                             "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
+                            "destinationAddressPrefix": "[concat(variables('jumpBoxIpPrefix'),'0')]",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "nameNode",
+                        "properties": {
+                            "description": "Allow remote connection to the name node.",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "1",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "[concat(variables('masterIpPrefix'),'0')]",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "resourceManager",
+                        "properties": {
+                            "description": "Allow remote connection to the resource manager node.",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "2",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "[concat(variables('masterIpPrefix'),'1')]",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "webAppProxy",
+                        "properties": {
+                            "description": "Allow remote connection to the web application proxy node.",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "[concat(variables('masterIpPrefix'),'2')]",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "mapReduceJobHistory",
+                        "properties": {
+                            "description": "Allow remote connection to the MapReduce job history node.",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "4",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "[concat(variables('masterIpPrefix'),'3')]",
                             "access": "Allow",
                             "priority": 200,
                             "direction": "Inbound"
@@ -151,6 +229,248 @@
                 ]
             }
         },
+        {
+            "name": "[variables('loadBalancerName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2015-06-15",
+            "location": "[variables('location')]",
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "frontEndLoadBalancer",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "inboundNatPools": [
+                    {
+                        "name": "ssh",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": 22,
+                            "frontendPortRangeEnd": 22,
+                            "backendPort": 22
+                        }
+                    },
+                    {
+                        "name": "jumpNode",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": 22,
+                            "frontendPortRangeEnd": 22,
+                            "backendPort": 22
+                        }
+                    },
+                    {
+                        "name": "nameNode",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": 22,
+                            "frontendPortRangeEnd": 22,
+                            "backendPort": 22
+                        }
+                    },
+                    {
+                        "name": "resourceManager",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": 22,
+                            "frontendPortRangeEnd": 22,
+                            "backendPort": 22
+                        }
+                    },
+                    {
+                        "name": "webAppProxy",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": 22,
+                            "frontendPortRangeEnd": 22,
+                            "backendPort": 22
+                        }
+                    },
+                    {
+                        "name": "mapReduceJobHistory",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": 22,
+                            "frontendPortRangeEnd": 22,
+                            "backendPort": 22
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "masterNodeTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('storageAccountName')]",
+                "[variables('loadBalancerName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('baseURI'),'master_node.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "clusterName": {
+                        "value": "[parameters('clusterName')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('masterNodeVMSize')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "storageAccountType": {
+                        "value": "[parameters('storageAccountType')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[variables('virtualNetworkName')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    },
+                    "ipPrefix": {
+                        "value": "[variables('masterIpPrefix')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "workerNodeTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('storageAccountName')]",
+                "[variables('loadBalancerName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('baseURI'),'worker_node.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "clusterName": {
+                        "value": "[parameters('clusterName')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('workerNodeVMSize')]"
+                    },
+                    "numberWorkers": {
+                        "value": "[parameters('numberWorkerNodes')]"
+                    },
+                    "dataDiskSize": {
+                        "value": "[parameters('dataDiskSize')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[variables('virtualNetworkName')]"
+                    },
+                    "ipPrefix": {
+                        "value": "[variables('workerIpPrefix')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "jumpBoxTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "masterNodeTemplate",
+                "workerNodeTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('baseURI'),'jumpbox_node.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "clusterName": {
+                        "value": "[parameters('clusterName')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "storageAccountType": {
+                        "value": "[parameters('storageAccountType')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[variables('virtualNetworkName')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    },
+                    "ipPrefix": {
+                        "value": "[variables('masterIpPrefix')]"
+                    },
+                    "numberWorkers": {
+                        "value": "[parameters('numberWorkerNodes')]"
+                    }
+                }
+            }
+        }
     ],
     "outputs": {}
 }

@@ -4,77 +4,37 @@
     "apiProfile": "2017-03-09-profile",
     "parameters": {
         "clusterName": {
-            "type": "string",
-            "defaultValue": "hadoop",
-            "metadata": {
-                "description": "Unique name of the hadoop cluster."
-            }
+            "type": "string"
         },
         "adminUsername": {
-            "type": "string",
-            "metadata": {
-                "description": "Username for the Virtual Machine controller."
-            },
-            "defaultValue": "localadmin"
+            "type": "string"
         },
         "adminPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for the Virtual Machine."
-            }
+            "type": "securestring"
         },
         "vmSize": {
-            "type": "string",
-            "defaultValue": "Standard_A1",
-            "metadata": {
-                "description": "The size of the Virtual Machine jump box."
-            },
-            "allowedValues": [
-                "Standard_A1",
-                "Standard_A2",
-                "Standard_A3",
-                "Standard_A4",
-                "Standard_A5",
-                "Standard_A6",
-                "Standard_A7"
-            ]
+            "type": "string"
         },
         "numberWorkers": {
-            "type": "int",
-            "defaultValue": 4,
-            "minValue": 1,
-            "maxValue": 32,
-            "metadata": {
-                "description": "The number of worker nodes in the cluster."
-            }
+            "type": "int"
         },
-        "netPrefix": {
-            "type": "string",
-            "defaultValue": "10.0.0.0/16",
-            "metadata": {
-                "description": "The address and subnet prefix of your network."
-            }
+        "storageAccountName": {
+            "type": "string"
+        },
+        "subnetName": {
+            "type": "string"
+        },
+        "virtualNetworkName": {
+            "type": "string"
         },
         "ipPrefix": {
-            "type": "string",
-            "defaultValue": "10.0.1.",
-            "metadata": {
-                "description": "The prefix of your master node IP addresses."
-            }
+            "type": "string"
         },
-        "storageAccountType": {
-            "type": "string",
-            "defaultValue": "Standard_LRS",
-            "allowedValues": [
-                "Standard_LRS",
-                "Standard_GRS",
-                "Standard_RAGRS",
-                "Standard_ZRS",
-                "Premium_LRS"
-            ],
-            "metadata": {
-                "description": "Storage account type.  For Azure Stack there is no difference so Standard_LRS is sufficient."
-            }
+        "networkSecurityGroupName": {
+            "type": "string"
+        },
+        "baseURI": {
+            "type": "string"
         }
     },
     "variables": {
@@ -83,86 +43,25 @@
         "imageOffer": "UbuntuServer",
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
-        "storageAccountName": "[tolower(concat(variables('defaultName'),'sa'))]",
-        "networkSecurityGroupName": "[tolower(concat(variables('defaultName'),'nsg'))]",
-        "subnetName": "[concat(variables('defaultName'),'sub')]",
-        "virtualNetworkName": "[concat(variables('defaultName'),'vnet')]",
-        "nicName": "[concat(variables('defaultName'),'nic')]",
+        "nicName": "[concat(variables('defaultName'),'nicjumpbox')]",
         "vmName": "[concat(variables('defaultName'),'jumpbox')]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
     },
     "resources": [
-        {
-            "comments": "Storage account which holds all containers and logs.",
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[toLower(variables('storageAccountName'))]",
-            "apiVersion": "2015-06-15",
-            "location": "[variables('location')]",
-            "properties": {
-                "accountType": "[parameters('storageAccountType')]"
-            }
-        },
-        {
-            "comments": "Network security group for the network.",
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[variables('networkSecurityGroupName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "ssh",
-                        "properties": {
-                            "description": "Allow remote connection using SSH.",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "22",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 200,
-                            "direction": "Inbound"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "comments": "Virtual network in which the nodes will reside.",
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Network/virtualNetworks",
-            "name": "[variables('virtualNetworkName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[parameters('netPrefix')]"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "[variables('subnetName')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('netPrefix')]"
-                        }
-                    }
-                ]
-            }
-        },
         {
             "comments": "Network interfaces for jumpbox.",
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[concat(variables('nicName'),'jumpbox')]",
+            "name": "[variables('nicName')]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-                "[variables('networkSecurityGroupName')]"
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
+                "[parameters('networkSecurityGroupName')]"
             ],
             "properties": {
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
                 },
                 "ipConfigurations": [
                     {
@@ -185,7 +84,7 @@
             "name": "[variables('vmName')]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
             ],
             "properties": {
@@ -212,7 +111,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "vhd": {
-                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('jumpbox',copyIndex(),'/')),'os.vhd')]"
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], 'jumpbox/'),'os.vhd')]"
                         }
                     }
                 },
@@ -226,13 +125,13 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": "true",
-                        "storageUri": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+                        "storageUri": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
                     }
                 }
             }
         },
         {
-            "name": "[concat(parameters('clusterName'),'/jumpNodeScript')]",
+            "name": "[concat(parameters('clusterName'),'/jumpboxSetup')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "location": "[resourceGroup().location]",
             "dependsOn": [
@@ -240,7 +139,7 @@
             ],
             "apiVersion": "2015-06-15",
             "tags": {
-                "displayName": "jumpNodeScript"
+                "displayName": "jumpboxSetup"
             },
             "properties": {
                 "publisher": "Microsoft.OSTCExtensions",
@@ -249,9 +148,9 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "https://hadoopsetup.blob.local.azurestack.external/scripts/jumpNodeScript.sh"
+                        "[concat(parameters('baseURI'),'/jumpboxSetup.sh')]"
                     ],
-                    "commandToExecute": "[concat('bash jumpNodeScript.sh',' ',parameters('clusterName'),' ',parameters('numberWorkers'),' ',parameters('adminPassword'))]"
+                    "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkers'),' ',parameters('adminPassword'))]"
                 }
             }
         }

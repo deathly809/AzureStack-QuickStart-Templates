@@ -4,85 +4,40 @@
     "apiProfile": "2017-03-09-profile",
     "parameters": {
         "clusterName": {
-            "type": "string",
-            "metadata": {
-                "description": "Name of the hadoop cluster.  Used as part of the name of each VM in the cluster."
-            }
+            "type": "string"
         },
         "adminUsername": {
-            "type": "string",
-            "defaultValue": "localadmin",
-            "metadata": {
-                "description": "Username for local administrator."
-            }
+            "type": "string"
         },
         "adminPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for local administrator."
-            }
+            "type": "securestring"
         },
         "vmSize": {
-            "type": "string",
-            "defaultValue": "Standard_DS3_v2",
-            "metadata": {
-                "description": "Hadoop worker node's virtual machine size."
-            },
-            "allowedValues": [
-                "Standard_DS3_v2",
-                "Standard_DS4_v2"
-            ]
+            "type": "string"
         },
         "numberWorkers": {
-            "type": "int",
-            "defaultValue": 4,
-            "minValue": 1,
-            "maxValue": 32,
-            "metadata": {
-                "description": "The number of worker nodes in the cluster."
-            }
+            "type": "int"
         },
         "dataDiskSize": {
-            "type": "int",
-            "defaultValue": 512,
-            "allowedValues": [
-                128,
-                256,
-                512,
-                768,
-                1024
-            ],
-            "metadata": {
-                "description": "Size of data disks which are used to store HDFS data."
-            }
+            "type": "int"
         },
-        "netPrefix": {
-            "type": "string",
-            "defaultValue": "10.0.0.0/16",
-            "metadata": {
-                "description": "The address and subnet prefix of your network."
-            }
+        "storageAccountName": {
+            "type": "string"
+        },
+        "subnetName": {
+            "type": "string"
+        },
+        "virtualNetworkName": {
+            "type": "string"
         },
         "ipPrefix": {
-            "type": "string",
-            "defaultValue": "10.0.1.",
-            "metadata": {
-                "description": "The prefix of your master node IP addresses."
-            }
+            "type": "string"
         },
-        "storageAccountType": {
-            "type": "string",
-            "defaultValue": "Standard_LRS",
-            "allowedValues": [
-                "Standard_LRS",
-                "Standard_GRS",
-                "Standard_RAGRS",
-                "Standard_ZRS",
-                "Premium_LRS"
-            ],
-            "metadata": {
-                "description": "Storage account type.  For Azure Stack there is no difference so Standard_LRS is sufficient."
-            }
+        "networkSecurityGroupName": {
+            "type": "string"
+        },
+        "baseURI": {
+            "type": "string"
         }
     },
     "variables": {
@@ -91,7 +46,7 @@
         "imageOffer": "UbuntuServer",
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
-        "nicName": "[concat(variables('defaultName'),'nic')]",
+        "nicName": "[concat(variables('defaultName'),'nicworker')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
     },
@@ -100,7 +55,7 @@
             "comments": "Network interfaces for each worker node.  These will only be private IP addresses.",
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[concat(variables('nicName'),'worker',copyIndex())]",
+            "name": "[concat(variables('nicName'),copyIndex())]",
             "location": "[variables('location')]",
             "copy": {
                 "name": "nicLoop",
@@ -128,14 +83,14 @@
             "comments": "Worker nodes.",
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(variables('vmName'),'Worker',copyIndex())]",
+            "name": "[concat(variables('defaultName'),'Worker',copyIndex())]",
             "location": "[variables('location')]",
             "copy": {
                 "name": "workerNodes",
                 "count": "[parameters('numberWorkers')]"
             },
             "dependsOn": [
-                "[variables('storageAccountName')]",
+                "[parameters('storageAccountName')]",
                 "nicLoop"
             ],
             "properties": {
@@ -160,7 +115,7 @@
                     "osDisk": {
                         "name": "[concat('osworkerdisk',copyIndex())]",
                         "vhd": {
-                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('osworker',copyIndex(),'/')),'os.vhd')]"
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex(),'/')),'os.vhd')]"
                         },
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
@@ -170,7 +125,7 @@
                             "name": "[concat('workerdatadisk',copyIndex())]",
                             "diskSizeGB": "[parameters('dataDiskSize')]",
                             "vhd": {
-                                "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('ddworker',copyIndex(),'/')),'data.vhd')]"
+                                "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('worker',copyIndex(),'/')),'data.vhd')]"
                             },
                             "lun": 0,
                             "caching": "ReadWrite",
@@ -188,13 +143,13 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": "true",
-                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
                     }
                 }
             }
         },
         {
-            "name": "[concat(variables('vmName'),'Worker',copyIndex(),'/hadoopSetup')]",
+            "name": "[concat(variables('defaultName'),'Worker',copyIndex(),'/hadoopSetup')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "location": "[resourceGroup().location]",
             "dependsOn": [
@@ -215,7 +170,7 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "https://hadoopsetup.blob.local.azurestack.external/scripts/hadoopSetup.sh"
+                        "[concat(parameters('baseURI'),'/hadoopSetup.sh')]"
                     ],
                     "protectedSettings": {
                         "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkers'))]"

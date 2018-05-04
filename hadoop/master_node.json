@@ -13,15 +13,7 @@
             "type": "securestring"
         },
         "vmSize": {
-            "type": "string",
-            "defaultValue": "Standard_DS3_v2",
-            "metadata": {
-                "description": "The size of the Virtual Machine workers."
-            },
-            "allowedValues": [
-                "Standard_DS3_v2",
-                "Standard_DS4_v2"
-            ]
+            "type": "string"
         },
         "storageAccountName": {
             "type": "string"
@@ -37,6 +29,9 @@
         },
         "ipPrefix": {
             "type": "string"
+        },
+        "baseURI": {
+            "type": "string"
         }
     },
     "variables": {
@@ -46,7 +41,9 @@
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
         "nicName": "[concat(variables('defaultName'),'nic')]",
-        "vmName": "[concat(variables('defaultName'),'jumpbox')]",
+        "vmName": "[variables('defaultName')]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
         "masters": [
             "NameNode",
             "ResourceManager",
@@ -56,16 +53,6 @@
         "numberMasters": "[length(variables('masters'))]"
     },
     "resources": [
-        {
-            "comments": "Storage account which holds all containers and logs.",
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[toLower(parameters('storageAccountName'))]",
-            "apiVersion": "2015-06-15",
-            "location": "[variables('location')]",
-            "properties": {
-                "accountType": "Standard_LRS"
-            }
-        },
         {
             "comments": "Network interfaces for each master node. This has a public and private IP address.",
             "apiVersion": "2015-06-15",
@@ -91,7 +78,7 @@
                             "privateIPAllocationMethod": "Static",
                             "privateIPAddress": "[concat(parameters('ipPrefix'),copyIndex())]",
                             "subnet": {
-                                "id": "[parameters('subnetName')]"
+                                "id": "[variables('subnetRef')]"
                             }
                         }
                     }
@@ -134,7 +121,7 @@
                     "osDisk": {
                         "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()])]",
                         "vhd": {
-                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('osmaster',copyIndex(),'/')),'os.vhd')]"
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('master',copyIndex(),'/')),'os.vhd')]"
                         },
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
@@ -177,7 +164,7 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "https://hadoopsetup.blob.local.azurestack.external/scripts/hadoopSetup.sh"
+                        "[concat(parameters('baseURI'),'/hadoopSetup.sh')]"
                     ],
                     "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'))]"
                 }
