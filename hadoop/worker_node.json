@@ -48,6 +48,7 @@
         "location": "[resourceGroup().location]",
         "nicName": "[concat(variables('defaultName'),'nicworker')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
     },
     "resources": [
@@ -63,7 +64,7 @@
             },
             "properties": {
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                    "id": "[variables('nsgID')]"
                 },
                 "ipConfigurations": [
                     {
@@ -90,7 +91,6 @@
                 "count": "[parameters('numberWorkers')]"
             },
             "dependsOn": [
-                "[parameters('storageAccountName')]",
                 "nicLoop"
             ],
             "properties": {

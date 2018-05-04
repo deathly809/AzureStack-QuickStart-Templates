@@ -46,6 +46,7 @@
         "nicName": "[concat(variables('defaultName'),'nic')]",
         "vmName": "[variables('defaultName')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
         "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
         "masters": [
@@ -67,13 +68,9 @@
                 "count": "[variables('numberMasters')]",
                 "name": "masterNics"
             },
-            "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
-                "[parameters('networkSecurityGroupName')]"
-            ],
             "properties": {
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                    "id": "[variables('nsgID')]"
                 },
                 "ipConfigurations": [
                     {
@@ -105,7 +102,6 @@
                 "count": "[variables('numberMasters')]"
             },
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
                 "masterNics"
             ],
             "properties": {

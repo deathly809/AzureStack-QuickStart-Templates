@@ -50,6 +50,7 @@
         "vmName": "[concat(variables('defaultName'),'jumpbox')]",
         "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
     },
     "resources": [
@@ -59,13 +60,9 @@
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[variables('nicName')]",
             "location": "[variables('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
-                "[parameters('networkSecurityGroupName')]"
-            ],
             "properties": {
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                    "id": "[variables('nsgID')]"
                 },
                 "ipConfigurations": [
                     {
@@ -93,7 +90,6 @@
             "name": "[variables('vmName')]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
             ],
             "properties": {
