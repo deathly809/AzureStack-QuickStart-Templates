@@ -69,6 +69,8 @@
         "storageAccountName": "[variables('defaultName')]",
         "storageAccountType": "Standard_LRS",
         "virtualNetworkName": "[variables('defaultName')]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "networkSecurityGroupName": "[tolower(variables('defaultName'))]",
         "masters": [
             "NameNode",
