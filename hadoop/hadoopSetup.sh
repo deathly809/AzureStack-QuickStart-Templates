@@ -82,31 +82,33 @@ attach_disks () {
 	# Get the disk without any partitions.
 	DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
 
-	#
-	# Format/Create partitions
-	#
-	sudo parted /dev/$DD mklabel gpt
-	sudo parted -a opt /dev/$DD mkpart primary ext4 0% 100%
-	sudo mkfs.ext4 -L datapartition /dev/${DD}1 -F
+    if ! [[ $DD == "" ]];then
+        #
+        # Format/Create partitions
+        #
+        sudo parted /dev/$DD mklabel gpt
+        sudo parted -a opt /dev/$DD mkpart primary ext4 0% 100%
+        sudo mkfs.ext4 -L datapartition /dev/${DD}1 -F
 
-	# Create mount point
-	mkdir $MOUNT -p
+        # Create mount point
+        mkdir $MOUNT -p
 
-	#
-	# Add to FSTAB
-	#
+        #
+        # Add to FSTAB
+        #
 
-	# Get the UUID
-	UUID=`blkid /dev/${dd}1 -s UUID -o value`
-	# Validate not already in FSTAB (Should never happen).
-	grep "$UUID" /etc/fstab > /dev/null 2>&1
-	if [ $? -ne 0 ]; then
-		# Append to the end of FSTAB
-		LINE="UUID=\"$UUID\"\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
-		echo -e "$LINE" >> /etc/fstab
-	fi
-	# mount
-	mount $MOUNT
+        # Get the UUID
+        UUID=`blkid /dev/${dd}1 -s UUID -o value`
+        # Validate not already in FSTAB (Should never happen).
+        grep "$UUID" /etc/fstab > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            # Append to the end of FSTAB
+            LINE="UUID=\"$UUID\"\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
+            echo -e "$LINE" >> /etc/fstab
+        fi
+        # mount
+        mount $MOUNT
+    fi
 }
 
 ############################################################

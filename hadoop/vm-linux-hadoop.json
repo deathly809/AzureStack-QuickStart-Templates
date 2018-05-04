@@ -198,8 +198,8 @@
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPort": 22,
-                            "backendPort": 22,
+                            "frontendPort": 1000,
+                            "backendPort": 1000,
                             "enableFloatingIP": false
                         }
                     },
@@ -210,8 +210,8 @@
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPort": 22,
-                            "backendPort": 22,
+                            "frontendPort": 2000,
+                            "backendPort": 2000,
                             "enableFloatingIP": false
                         }
                     },
@@ -222,8 +222,8 @@
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPort": 22,
-                            "backendPort": 22,
+                            "frontendPort": 3000,
+                            "backendPort": 3000,
                             "enableFloatingIP": false
                         }
                     },
@@ -234,8 +234,8 @@
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPort": 22,
-                            "backendPort": 22,
+                            "frontendPort": 4000,
+                            "backendPort": 4000,
                             "enableFloatingIP": false
                         }
                     },
@@ -246,8 +246,8 @@
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPort": 22,
-                            "backendPort": 22,
+                            "frontendPort": 5000,
+                            "backendPort": 5000,
                             "enableFloatingIP": false
                         }
                     }
