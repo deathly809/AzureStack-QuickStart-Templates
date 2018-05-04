@@ -82,7 +82,7 @@ attach_disks () {
 	# Get the disk without any partitions.
 	DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
 
-    if ! [[ $DD == "" ]];then
+    if [ -n "$VAR" ];
         #
         # Format/Create partitions
         #
