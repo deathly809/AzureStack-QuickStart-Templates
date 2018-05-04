@@ -156,7 +156,7 @@
                 "workerNodes"
             ],
             "copy": {
-                "name": "hadoopSetup",
+                "name": "workerHadoopSetup",
                 "count": "[parameters('numberWorkers')]"
             },
             "apiVersion": "2015-06-15",
@@ -164,16 +164,16 @@
                 "displayName": "hadoopSetup"
             },
             "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
+                "publisher": "Microsoft.Azure.Extensions",
                 "type": "CustomScriptForLinux",
-                "typeHandlerVersion": "1.3",
+                "typeHandlerVersion": "2.0",
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/hadoopSetup.sh')]"
                     ],
                     "protectedSettings": {
-                        "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkers'))]"
+                        "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'))]"
                     }
                 }
             }

@@ -48,25 +48,6 @@ USERS=("hadoop" "hdfs" "mapred" "yarn")
 # Name of the cluster
 CLUSTER_NAME="$1"
 
-# How many worker nodes
-NUMBER_NODES="$2"
-
-
-############################################################
-#
-# 	Create the list of master and worker nodes in the
-#	cluster
-#
-
-# Start with masters
-NODES=( "${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}WebProxy" "${CLUSTER_NAME}JobHistory")
-# Add workers
-for i in `seq 1 $NUMBER_NODES)`
-do
-	worker="${CLUSTER_NAME}Worker$i"
-	NODES[$((i + 4))]=$worker
-done
-
 ############################################################
 #
 # 	Install pre-reqs

@@ -100,7 +100,7 @@
         "jumpBoxIpPrefix": "10.0.0.",
         "masterIpPrefix": "10.0.1.",
         "workerIpPrefix": "10.0.2.",
-        "baseURI": "TODO"
+        "baseURI": "https://raw.githubusercontent.com/deathly809/AzureStack-QuickStart-Templates/hadoop/hadoop"
     },
     "resources": [
         {

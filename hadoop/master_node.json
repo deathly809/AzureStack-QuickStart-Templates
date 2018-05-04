@@ -158,9 +158,9 @@
                 "displayName": "hadoopSetup"
             },
             "properties": {
-                "publisher": "Microsoft.OSTCExtensions",
+                "publisher": "Microsoft.Azure.Extensions",
                 "type": "CustomScriptForLinux",
-                "typeHandlerVersion": "1.3",
+                "typeHandlerVersion": "2.0",
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
