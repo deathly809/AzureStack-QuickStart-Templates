@@ -27,10 +27,10 @@
         "subnetName": {
             "type": "string"
         },
-        "ipPrefix": {
+        "loadBalancerName": {
             "type": "string"
         },
-        "loadBalancerName": {
+        "ipPrefix": {
             "type": "string"
         },
         "baseURI": {

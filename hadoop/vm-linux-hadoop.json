@@ -96,7 +96,6 @@
         "subnetName": "[concat(variables('defaultName'),'sub')]",
         "virtualNetworkName": "[concat(variables('defaultName'),'vnet')]",
         "loadBalancerName": "[concat(variables('defaultName'),'lb')]",
-        "storageAccountType": "Standard_LRS",
         "jumpBoxIpPrefix": "10.0.0.",
         "masterIpPrefix": "10.0.1.",
         "workerIpPrefix": "10.0.2.",
@@ -110,7 +109,7 @@
             "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
-                "accountType": "[variables('storageAccountType')]"
+                "accountType": "[parameters('storageAccountType')]"
             }
         },
         {
@@ -288,9 +287,6 @@
                     "storageAccountName": {
                         "value": "[variables('storageAccountName')]"
                     },
-                    "storageAccountType": {
-                        "value": "[parameters('storageAccountType')]"
-                    },
                     "networkSecurityGroupName": {
                         "value": "[variables('networkSecurityGroupName')]"
                     },
@@ -300,8 +296,14 @@
                     "subnetName": {
                         "value": "[variables('subnetName')]"
                     },
+                    "loadBalancerName": {
+                        "value": "[variables('loadBalancerName')]"
+                    },
                     "ipPrefix": {
                         "value": "[variables('masterIpPrefix')]"
+                    },
+                    "baseURI": {
+                        "value": "[variables('baseURI')]"
                     }
                 }
             }
@@ -353,6 +355,9 @@
                     },
                     "networkSecurityGroupName": {
                         "value": "[variables('networkSecurityGroupName')]"
+                    },
+                    "baseURI": {
+                        "value": "[variables('baseURI')]"
                     }
                 }
             }
@@ -381,26 +386,32 @@
                     "adminPassword": {
                         "value": "[parameters('adminPassword')]"
                     },
+                    "vmSize": {
+                        "value": "[parameters('masterNodeVMSize')]"
+                    },
+                    "numberWorkers": {
+                        "value": "[parameters('numberWorkerNodes')]"
+                    },
                     "storageAccountName": {
                         "value": "[variables('storageAccountName')]"
-                    },
-                    "storageAccountType": {
-                        "value": "[parameters('storageAccountType')]"
-                    },
-                    "networkSecurityGroupName": {
-                        "value": "[variables('networkSecurityGroupName')]"
-                    },
-                    "virtualNetworkName": {
-                        "value": "[variables('virtualNetworkName')]"
                     },
                     "subnetName": {
                         "value": "[variables('subnetName')]"
                     },
+                    "virtualNetworkName": {
+                        "value": "[variables('virtualNetworkName')]"
+                    },
                     "ipPrefix": {
                         "value": "[variables('jumpBoxIpPrefix')]"
                     },
-                    "numberWorkers": {
-                        "value": "[parameters('numberWorkerNodes')]"
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    },
+                    "loadBalancerName": {
+                        "value": "[variables('loadBalancerName')]"
+                    },
+                    "baseURI": {
+                        "value": "[variables('baseURI')]"
                     }
                 }
             }
