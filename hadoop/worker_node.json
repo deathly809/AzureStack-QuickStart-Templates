@@ -55,6 +55,34 @@
             "metadata": {
                 "description": "Size of data disks which are used to store HDFS data."
             }
+        },
+        "netPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/16",
+            "metadata": {
+                "description": "The address and subnet prefix of your network."
+            }
+        },
+        "ipPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.1.",
+            "metadata": {
+                "description": "The prefix of your master node IP addresses."
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Storage account type.  For Azure Stack there is no difference so Standard_LRS is sufficient."
+            }
         }
     },
     "variables": {
@@ -64,60 +92,10 @@
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
         "nicName": "[concat(variables('defaultName'),'nic')]",
-        "addressPrefix": "10.0.0.0/16",
-        "subnetPrefix": "10.0.0.0/16",
-        "subnetName": "[concat(variables('defaultName'),'sub')]",
-        "storageAccountName": "[toLower(concat(variables('defaultName'),'sa'))]",
-        "storageAccountType": "Standard_LRS",
-        "vmName": "[variables('defaultName')]",
-        "virtualNetworkName": "[concat(variables('defaultName'),'vn')]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "networkSecurityGroupName": "[tolower(variables('defaultName'))]"
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
     },
     "resources": [
-        {
-            "comments": "Storage account which holds all containers and logs.",
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[variables('storageAccountName')]",
-            "apiVersion": "2015-06-15",
-            "location": "[variables('location')]",
-            "properties": {
-                "accountType": "[variables('storageAccountType')]"
-            }
-        },
-        {
-            "comments": "Network security group for the network.",
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[variables('networkSecurityGroupName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "securityRules": []
-            }
-        },
-        {
-            "comments": "Virtual network in which the nodes will reside.",
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Network/virtualNetworks",
-            "name": "[variables('virtualNetworkName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('addressPrefix')]"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "[variables('subnetName')]",
-                        "properties": {
-                            "addressPrefix": "[variables('subnetPrefix')]"
-                        }
-                    }
-                ]
-            }
-        },
         {
             "comments": "Network interfaces for each worker node.  These will only be private IP addresses.",
             "apiVersion": "2015-06-15",
@@ -128,20 +106,16 @@
                 "name": "nicLoop",
                 "count": "[parameters('numberWorkers')]"
             },
-            "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-                "[variables('networkSecurityGroupName')]"
-            ],
             "properties": {
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
                 },
                 "ipConfigurations": [
                     {
                         "name": "privateIpConfig",
                         "properties": {
                             "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[concat('192.168.2.',copyIndex())]",
+                            "privateIPAddress": "[concat(parameters('ipPrefix'),copyIndex())]",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }

@@ -47,6 +47,34 @@
             "metadata": {
                 "description": "The number of worker nodes in the cluster."
             }
+        },
+        "netPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/16",
+            "metadata": {
+                "description": "The address and subnet prefix of your network."
+            }
+        },
+        "ipPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.1.",
+            "metadata": {
+                "description": "The prefix of your master node IP addresses."
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Storage account type.  For Azure Stack there is no difference so Standard_LRS is sufficient."
+            }
         }
     },
     "variables": {
@@ -55,27 +83,14 @@
         "imageOffer": "UbuntuServer",
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
-        "OSDiskName": "[variables('defaultName')]",
-        "nicName": "hadoopNic",
-        "publicIPAddressName": "[variables('defaultName')]",
-        "addressPrefix": "10.0.0.0/16",
-        "subnetPrefix": "10.0.0.0/16",
-        "subnetName": "[variables('defaultName')]",
-        "storageAccountName": "[variables('defaultName')]",
-        "storageAccountType": "Standard_LRS",
-        "vmStorageAccountContainerName": "[variables('defaultName')]",
+        "storageAccountName": "[tolower(concat(variables('defaultName'),'sa'))]",
+        "networkSecurityGroupName": "[tolower(concat(variables('defaultName'),'nsg'))]",
+        "subnetName": "[concat(variables('defaultName'),'sub')]",
+        "virtualNetworkName": "[concat(variables('defaultName'),'vnet')]",
+        "nicName": "[concat(variables('defaultName'),'nic')]",
         "vmName": "[concat(variables('defaultName'),'jumpbox')]",
-        "virtualNetworkName": "[variables('defaultName')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "networkSecurityGroupName": "[tolower(variables('defaultName'))]",
-        "masters": [
-            "NameNode",
-            "ResourceManager",
-            "WebAppProxy",
-            "MapReduceJobHistory"
-        ],
-        "numberMasters": "[length(variables('masters'))]"
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
     },
     "resources": [
         {
@@ -85,7 +100,7 @@
             "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
-                "accountType": "[variables('storageAccountType')]"
+                "accountType": "[parameters('storageAccountType')]"
             }
         },
         {
@@ -122,27 +137,26 @@
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
-                        "[variables('addressPrefix')]"
+                        "[parameters('netPrefix')]"
                     ]
                 },
                 "subnets": [
                     {
                         "name": "[variables('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[variables('subnetPrefix')]"
+                            "addressPrefix": "[parameters('netPrefix')]"
                         }
                     }
                 ]
             }
         },
         {
-            "comments": "Network interfaces for each master node. This has a public and private IP address.",
+            "comments": "Network interfaces for jumpbox.",
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicName'),'jumpbox')]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'),'jumpbox')]",
                 "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
                 "[variables('networkSecurityGroupName')]"
             ],
@@ -154,7 +168,8 @@
                     {
                         "name": "publicIpConfig",
                         "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(parameters('ipPrefix'),'0')]",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }
@@ -197,7 +212,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "vhd": {
-                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('jumpbox',copyIndex(),'/')),'os.vhd')]"
                         }
                     }
                 },
@@ -211,7 +226,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": "true",
-                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+                        "storageUri": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
                     }
                 }
             }
