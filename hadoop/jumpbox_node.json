@@ -33,6 +33,9 @@
         "networkSecurityGroupName": {
             "type": "string"
         },
+        "loadBalancerName": {
+            "type": "string"
+        },
         "baseURI": {
             "type": "string"
         }
@@ -45,6 +48,7 @@
         "location": "[resourceGroup().location]",
         "nicName": "[concat(variables('defaultName'),'nicjumpbox')]",
         "vmName": "[concat(variables('defaultName'),'jumpbox')]",
+        "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
     },
@@ -65,14 +69,19 @@
                 },
                 "ipConfigurations": [
                     {
-                        "name": "publicIpConfig",
+                        "name": "privateIpConfiguration",
                         "properties": {
                             "privateIPAllocationMethod": "Static",
                             "privateIPAddress": "[concat(parameters('ipPrefix'),'0')]",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }
-                        }
+                        },
+                        "loadBalancerInboundNatRules": [
+                            {
+                                "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/','frontEndLoadBalancer/JumpNode')]"
+                            }
+                        ]
                     }
                 ]
             }

@@ -155,78 +155,7 @@
             "name": "[variables('networkSecurityGroupName')]",
             "location": "[variables('location')]",
             "properties": {
-                "securityRules": [
-                    {
-                        "name": "ssh",
-                        "properties": {
-                            "description": "Allow remote connection using SSH to the jump node.",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "22",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "[concat(variables('jumpBoxIpPrefix'),'0')]",
-                            "access": "Allow",
-                            "priority": 200,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "nameNode",
-                        "properties": {
-                            "description": "Allow remote connection to the name node.",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "1",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "[concat(variables('masterIpPrefix'),'0')]",
-                            "access": "Allow",
-                            "priority": 200,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "resourceManager",
-                        "properties": {
-                            "description": "Allow remote connection to the resource manager node.",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "2",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "[concat(variables('masterIpPrefix'),'1')]",
-                            "access": "Allow",
-                            "priority": 200,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "webAppProxy",
-                        "properties": {
-                            "description": "Allow remote connection to the web application proxy node.",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "3",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "[concat(variables('masterIpPrefix'),'2')]",
-                            "access": "Allow",
-                            "priority": 200,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "mapReduceJobHistory",
-                        "properties": {
-                            "description": "Allow remote connection to the MapReduce job history node.",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "4",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "[concat(variables('masterIpPrefix'),'3')]",
-                            "access": "Allow",
-                            "priority": 200,
-                            "direction": "Inbound"
-                        }
-                    }
-                ]
+                "securityRules": []
             }
         },
         {
@@ -245,7 +174,12 @@
                         }
                     }
                 ],
-                "inboundNatPools": [
+                "loadBalancerBackendAddressPools": [
+                    {
+                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/', 'backendAddressPool')]"
+                    }
+                ],
+                "inboundNatRules": [
                     {
                         "name": "ssh",
                         "properties": {
@@ -253,69 +187,69 @@
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPortRangeStart": 22,
-                            "frontendPortRangeEnd": 22,
-                            "backendPort": 22
+                            "frontendPort": 22,
+                            "backendPort": 22,
+                            "enableFloatingIP": false
                         }
                     },
                     {
-                        "name": "jumpNode",
+                        "name": "JumpNode",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPortRangeStart": 22,
-                            "frontendPortRangeEnd": 22,
-                            "backendPort": 22
+                            "frontendPort": 22,
+                            "backendPort": 22,
+                            "enableFloatingIP": false
                         }
                     },
                     {
-                        "name": "nameNode",
+                        "name": "NameNode",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPortRangeStart": 22,
-                            "frontendPortRangeEnd": 22,
-                            "backendPort": 22
+                            "frontendPort": 22,
+                            "backendPort": 22,
+                            "enableFloatingIP": false
                         }
                     },
                     {
-                        "name": "resourceManager",
+                        "name": "ResourceManager",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPortRangeStart": 22,
-                            "frontendPortRangeEnd": 22,
-                            "backendPort": 22
+                            "frontendPort": 22,
+                            "backendPort": 22,
+                            "enableFloatingIP": false
                         }
                     },
                     {
-                        "name": "webAppProxy",
+                        "name": "WebAppProxy",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPortRangeStart": 22,
-                            "frontendPortRangeEnd": 22,
-                            "backendPort": 22
+                            "frontendPort": 22,
+                            "backendPort": 22,
+                            "enableFloatingIP": false
                         }
                     },
                     {
-                        "name": "mapReduceJobHistory",
+                        "name": "MapReduceJobHistory",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPortRangeStart": 22,
-                            "frontendPortRangeEnd": 22,
-                            "backendPort": 22
+                            "frontendPort": 22,
+                            "backendPort": 22,
+                            "enableFloatingIP": false
                         }
                     }
                 ]
@@ -335,7 +269,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('baseURI'),'master_node.json')]",
+                    "uri": "[concat(variables('baseURI'),'/master_node.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -383,7 +317,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('baseURI'),'worker_node.json')]",
+                    "uri": "[concat(variables('baseURI'),'/worker_node.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -434,7 +368,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('baseURI'),'jumpbox_node.json')]",
+                    "uri": "[concat(variables('baseURI'),'/jumpbox_node.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -463,7 +397,7 @@
                         "value": "[variables('subnetName')]"
                     },
                     "ipPrefix": {
-                        "value": "[variables('masterIpPrefix')]"
+                        "value": "[variables('jumpBoxIpPrefix')]"
                     },
                     "numberWorkers": {
                         "value": "[parameters('numberWorkerNodes')]"

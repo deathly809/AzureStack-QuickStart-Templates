@@ -30,6 +30,9 @@
         "ipPrefix": {
             "type": "string"
         },
+        "loadBalancerName": {
+            "type": "string"
+        },
         "baseURI": {
             "type": "string"
         }
@@ -44,6 +47,7 @@
         "vmName": "[variables('defaultName')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
+        "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
         "masters": [
             "NameNode",
             "ResourceManager",
@@ -80,7 +84,12 @@
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }
-                        }
+                        },
+                        "loadBalancerInboundNatRules": [
+                            {
+                                "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/','frontEndLoadBalancer/',variables('masters')[copyIndex()])]"
+                            }
+                        ]
                     }
                 ]
             }
