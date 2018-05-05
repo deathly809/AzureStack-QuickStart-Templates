@@ -82,7 +82,7 @@ attach_disks () {
 	# Get the disk without any partitions.
 	DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
 
-    if [ -n "$VAR" ];
+    if [ -n "$DD" ];
         #
         # Format/Create partitions
         #
@@ -230,3 +230,5 @@ install_hadoop
 setup_node
 
 echo -e "Success"
+
+exit 0
