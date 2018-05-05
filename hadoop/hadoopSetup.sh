@@ -82,7 +82,7 @@ attach_disks () {
 	# Get the disk without any partitions.
 	DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
 
-    if [ -n "$DD" ];
+    if [ -n "$DD" ]; then
         #
         # Format/Create partitions
         #
@@ -125,10 +125,12 @@ add_users () {
 	for user in "${USERS[@]}";
 	do
 		# Create user
+        useradd -m $user -G hadoop
 		adduser -m --ingroup hadoop $user
+        echo "$user:$password" | chpasswd
 
 		# Location of SSH files
-		SSH_DIR=/home/$user/.ssh/
+		SSH_DIR=/home/$user/.ssh
 
 		# Key name
 		KEY_NAME=$SSH_DIR/id_rsa
@@ -192,19 +194,22 @@ setup_node () {
 
 	if [[ $ROLE = "*Worker*" ]];
 	then
-		# Setup as a worker node
+		echo "Worker"
 	elif [[ $ROLE == "*NameNode*" ]];
-		# Setup as a name node
 	then
+        echo "NameNode"
 	elif [[ $ROLE == "*WebProxy*" ]];
-		# Setup as a webproxy
 	then
+		echo "WebProxy"
 	elif [[ $ROLE == "*ResourceManager*" ]];
-		# Setup as a resource manager
 	then
+		echo "Worker"
 	elif [[ $ROLE == "*JobHistory*" ]];
-		# Setup as the job history node
 	then
+		echo "JobHistory"
+    else
+        echo "ERROR"
+        exit 999
 	fi
 }
 
