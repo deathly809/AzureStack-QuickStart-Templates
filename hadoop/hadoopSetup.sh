@@ -69,46 +69,48 @@ preinstall () {
 #
 
 attach_disks () {
-	#
-	# Locate the datadisk
-	#
 
-	# List all disks.
-	DISKS=`lsblk -d | grep "disk" | grep -v "^f"  | awk -F ' ' '{print $1}'`
+    #
+    # Locate the datadisk
+    #
 
-	# List all partitions.
-	PARTS='lsblk | grep part'
+    # List all disks.
+    DISKS=`lsblk -d | grep "disk" | grep -v "^f"  | awk -F ' ' '{print $1}'`
 
-	# Get the disk without any partitions.
-	DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
+    # List all partitions.
+    PARTS='lsblk | grep part'
 
-    if [ -n "$DD" ]; then
-        #
-        # Format/Create partitions
-        #
-        sudo parted /dev/$DD mklabel gpt
-        sudo parted -a opt /dev/$DD mkpart primary ext4 0% 100%
-        sudo mkfs.ext4 -L datapartition /dev/${DD}1 -F
+    # Get the disk without any partitions.
+    DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
 
-        # Create mount point
-        mkdir $MOUNT -p
+    #
+    # Format/Create partitions
+    #
+    sudo parted /dev/$DD mklabel gpt
+    sudo parted -a opt /dev/$DD mkpart primary ext4 0% 100%
 
-        #
-        # Add to FSTAB
-        #
+    # write file-system lazily for performance reasons.
+    sudo mkfs.ext4 -L datapartition /dev/${DD}1 -F -E lazy_itable_init=1
 
-        # Get the UUID
-        UUID=`blkid /dev/${dd}1 -s UUID -o value`
-        # Validate not already in FSTAB (Should never happen).
-        grep "$UUID" /etc/fstab > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-            # Append to the end of FSTAB
-            LINE="UUID=\"$UUID\"\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
-            echo -e "$LINE" >> /etc/fstab
-        fi
-        # mount
-        mount $MOUNT
+    # Create mount point
+    mkdir $MOUNT -p
+
+    #
+    # Add to FSTAB
+    #
+
+    # Get the UUID
+    UUID=`blkid /dev/${dd}1 -s UUID -o value`
+    # Validate not already in FSTAB (Should never happen).
+    grep "$UUID" /etc/fstab > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        # Append to the end of FSTAB
+        LINE="UUID=\"$UUID\"\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
+        echo -e "$LINE" >> /etc/fstab
     fi
+
+    # mount
+    mount $MOUNT
 }
 
 ############################################################
@@ -222,8 +224,12 @@ setup_node () {
 # Pre-install all required programs
 preinstall
 
-# Attach all data disks
-attach_disks
+
+# If a worker node we need to attach the disks
+if [[ "$ROLE" =~ "Worker" ]]; then
+    # Attach all data disks
+    attach_disks
+fi
 
 # Add all Hadoop users
 add_users
