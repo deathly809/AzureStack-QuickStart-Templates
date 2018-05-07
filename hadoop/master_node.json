@@ -65,8 +65,8 @@
             "name": "[concat(variables('nicName'),variables('masters')[copyIndex()])]",
             "location": "[variables('location')]",
             "copy": {
-                "count": "[variables('numberMasters')]",
-                "name": "masterNics"
+                "name": "masterNics",
+                "count": "[variables('numberMasters')]"
             },
             "properties": {
                 "networkSecurityGroup": {

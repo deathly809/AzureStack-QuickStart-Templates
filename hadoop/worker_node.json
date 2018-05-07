@@ -56,7 +56,7 @@
             "comments": "Network interfaces for each worker node.  These will only be private IP addresses.",
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[concat(variables('nicName'),copyIndex())]",
+            "name": "[concat(variables('nicName'),'Worker',copyIndex())]",
             "location": "[variables('location')]",
             "copy": {
                 "name": "nicLoop",
