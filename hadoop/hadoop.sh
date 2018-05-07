@@ -1,13 +1,4 @@
 
-source /etc/profile.d/hadoop26-env.sh
-source /etc/profile.d/jdk.sh
-source /etc/init.d/functions
-source ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
-source ${HADOOP_HOME}/etc/hadoop/yarn-env.sh
-
-RETVAL=0
-PIDFILE="${YARN_PID_DIR}/hadoop-yarn-nodemanager.pid"
-
 ROLE='UNKNOWN'
 HOST=`hostname`
 
@@ -65,11 +56,6 @@ stop() {
     return $RETVAL
 }
 
-checkstatus(){
-    echo $"$desc $(status -p $PIDFILE)"
-    RETVAL=$?
-}
-
 restart() {
     stop
     start
@@ -82,14 +68,11 @@ case "$1" in
     stop)
         stop
     ;;
-    status)
-        checkstatus
-    ;;
     restart)
         restart
     ;;
     *)
-        echo $"Usage: $0 {start|stop|status|restart}"
+        echo $"Usage: $0 {start|stop|restart}"
         exit 1
 esac
 
