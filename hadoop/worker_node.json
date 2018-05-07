@@ -68,7 +68,7 @@
                 },
                 "ipConfigurations": [
                     {
-                        "name": "privateIpConfig",
+                        "name": "workerIpConfig",
                         "properties": {
                             "privateIPAllocationMethod": "Static",
                             "privateIPAddress": "[concat(parameters('ipPrefix'),copyIndex())]",
@@ -98,7 +98,7 @@
                     "vmSize": "[parameters('vmSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[concat(parameters('clusterName'),'worker',copyIndex())]",
+                    "computerName": "[concat(parameters('clusterName'),'Worker',copyIndex())]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "linuxConfiguration": {
@@ -136,7 +136,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),'worker',copyIndex()))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),'Worker',copyIndex()))]"
                         }
                     ]
                 },

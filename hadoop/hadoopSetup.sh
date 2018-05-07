@@ -29,7 +29,7 @@ set -v +H
 #
 
 # Download location of hadoop
-HADOOP_URI="http://ftp.wayne.edu/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz"
+HADOOP_URI='http://ftp.wayne.edu/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz'
 # What we want to call it locally
 HADOOP_FILE_NAME="hadoop.tar.gz"
 # Where we mount the data disk
@@ -128,7 +128,6 @@ add_users () {
 	do
 		# Create user
         useradd -m $user -G hadoop
-		adduser -m --ingroup hadoop $user
         echo "$user:$password" | chpasswd
 
 		# Location of SSH files
@@ -154,7 +153,7 @@ add_users () {
 install_hadoop () {
 
 	# Download
-	wget -i $HADOOP_URI -o $HADOOP_FILE_NAME
+	wget "$HADOOP_URI" -O "$HADOOP_FILE_NAME"
 	# Extract
 	tar -xvzf $HADOOP_FILE_NAME
 	# Remove archive
