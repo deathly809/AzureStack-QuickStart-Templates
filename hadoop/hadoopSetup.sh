@@ -37,7 +37,7 @@ MOUNT="/media/data"
 # Get the role of this node
 ROLE=`hostname`
 # Hadoop Users
-USERS=("hadoop" "hdfs" "mapred" "yarn")
+USERS=("hdfs" "mapred" "yarn")
 
 ############################################################
 #
@@ -168,7 +168,7 @@ install_hadoop () {
 	echo -e "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin" >> /etc/profile
 
 	# Hadoop user own hadoop installation
-	chown hduser:hadoop -R /usr/local/hadoop
+	chown :hadoop -R /usr/local/hadoop
 
     if [[ "$ROLE" =~ "Worker" ]];
     then
@@ -176,8 +176,8 @@ install_hadoop () {
         mkdir $MOUNT/tmp_fs
         mkdir $MOUNT/tmp_something
 
-        # Hadoop user owns everything on the data disk
-	    chown hduser:hadoop -R $MOUNT
+        # HDFS owns everything on the data disk
+	    chown hdfs:hadoop -R $MOUNT
     fi
 }
 
@@ -194,19 +194,27 @@ setup_node () {
 
 	if [[ $ROLE = "*Worker*" ]];
 	then
-		echo "Worker"
+
+		echo -n "Worker"
+
 	elif [[ $ROLE == "*NameNode*" ]];
 	then
-        echo "NameNode"
-	elif [[ $ROLE == "*WebProxy*" ]];
-	then
-		echo "WebProxy"
+
+        # Copy startup script to correct place
+        cp hadoop.sh /etc/init/hadoop.sh
+
 	elif [[ $ROLE == "*ResourceManager*" ]];
 	then
-		echo "Worker"
+
+		# Copy startup script to correct place
+        cp hadoop.sh /etc/init/hadoop.sh
+
 	elif [[ $ROLE == "*JobHistory*" ]];
 	then
-		echo "JobHistory"
+
+		# Copy startup script to correct place
+        cp hadoop.sh /etc/init/hadoop.sh
+
     else
         echo "ERROR"
         exit 999

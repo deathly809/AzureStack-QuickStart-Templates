@@ -170,7 +170,8 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/hadoopSetup.sh')]"
+                        "[concat(parameters('baseURI'),'/hadoopSetup.sh')]",
+                        "[concat(parameters('baseURI'),'/hadoop.sh')]"
                     ],
                     "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'))]"
                 }
