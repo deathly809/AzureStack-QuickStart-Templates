@@ -157,29 +157,28 @@ install_hadoop () {
 	# Extract
 	tar -xvzf $HADOOP_FILE_NAME
 	# Remove archive
-	rm *.tgz
+	rm *.gz
 	# Move to /usr/local
 	mv hadoop* /usr/local/hadoop
-	# Create HDFS directories
-	mkdir $MOUNT/tmp_fs
-	mkdir $MOUNT/tmp_something
 
 	#
 	# Global profile environment variables
 	#
-
 	echo -e "export HADOOP_HOME=/usr/local/hadoop" >> /etc/profile
 	echo -e "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin" >> /etc/profile
-
-	#
-	# Create permissions for Hadoop
-	#
 
 	# Hadoop user own hadoop installation
 	chown hduser:hadoop -R /usr/local/hadoop
 
-	# Hadoop user owns everything on the data disk
-	chown hduser:hadoop -R $MOUNT
+    if [[ "$ROLE" =~ "Worker" ]];
+    then
+        # Create HDFS directories
+        mkdir $MOUNT/tmp_fs
+        mkdir $MOUNT/tmp_something
+
+        # Hadoop user owns everything on the data disk
+	    chown hduser:hadoop -R $MOUNT
+    fi
 }
 
 

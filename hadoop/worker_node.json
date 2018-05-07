@@ -172,9 +172,7 @@
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/hadoopSetup.sh')]"
                     ],
-                    "protectedSettings": {
-                        "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'))]"
-                    }
+                    "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'))]"
                 }
             }
         }
