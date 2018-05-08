@@ -38,6 +38,8 @@ MOUNT="/media/data"
 ROLE=`hostname`
 # Hadoop Users
 USERS=("hdfs" "mapred" "yarn")
+# Hadoop home
+HADOOP_HOME=/usr/local/hadoop
 
 ############################################################
 #
@@ -162,13 +164,14 @@ install_hadoop () {
     # Remove archive
     rm *.gz
     # Move to /usr/local
-    mv hadoop* /usr/local/hadoop
+    mkdir -p ${HADOOP_HOME}
+    mv hadoop* ${HADOOP_HOME}
 
     #
     # Global profile environment variables
     #
-    echo -e "export HADOOP_HOME=/usr/local/hadoop" >> /etc/profile
-    echo -e "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin" >> /etc/profile
+    echo -e 'export HADOOP_HOME=/usr/local/hadoop' >> /etc/profile
+    echo -e 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin' >> /etc/profile
 
     # Hadoop user own hadoop installation
     chown :hadoop -R /usr/local/hadoop
@@ -196,13 +199,12 @@ setup_node () {
     setup_master() {
 
         # Copy startup script to correct place
-        cp ${PWD}/hadoop.sh /etc/init/hadoop.sh
+        cp ${PWD}/hadoop.sh /etc/init.d/hadoop.sh
+        chmod +x /etc/init.d/hadoop.sh
 
         # create symlink
-        cd /etc/rc2.d
-        sudo ln -s /etc/init.d/hadoop.sh
-        sudo mv hadoop.sh S70hadoop.sh
-        cd -
+        sudo ln -s /etc/init.d/hadoop.sh /etc/rc2.d/hadoop.sh
+        sudo mv /etc/rc2.d/hadoop.sh /etc/rc2.d/S70hadoop.sh
 
         # Create slaves file
         touch $HADOOP_HOME/etc/hadoop/slaves
@@ -212,15 +214,16 @@ setup_node () {
         done
     }
 
-    # Format HDFS
-    sudo -H -u hadoop bash -c 'hdfs namenode format'
-
     if [[ $ROLE = "*Worker*" ]];
     then
         echo -n "Nothing to do for workers"
     elif [[ $ROLE == "*NameNode*" ]];
     then
+
+        # format HDFS
+        sudo -H -u hdfs bash -c "${HADOOP_HOME}/bin/hdfs namenode format"
         setup_master
+
     elif [[ $ROLE == "*ResourceManager*" ]];
     then
         setup_master

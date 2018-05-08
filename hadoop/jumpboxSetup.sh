@@ -93,7 +93,6 @@ copy_users () {
     done
 }
 
-
 ############################################################
 #
 # 	Restart each node in the Hadoop cluster.  This will
