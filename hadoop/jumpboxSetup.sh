@@ -77,9 +77,9 @@ preinstall () {
 # 	Copy public keys from all nodes to all other nodes.
 #
 copy_users () {
-    for FROM in $NODES do
-        for TO in $NODES do
-            for U in $USERS do
+    for FROM in ${NODES[@]} do
+        for TO in ${NODES[@]} do
+            for U in ${USERS[@]} do
                 # Copy public key here
                 sshpass -p $PASSWORD scp $FROM:/home/$U/.ssh/id_rsa.pub .
 
@@ -99,7 +99,7 @@ copy_users () {
 #   cause Hadoop to start on each node.
 #
 restart_nodes () {
-    for N in $NODES do
+    for N in ${NODES[@]} do
         sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $TO 'echo $PASSWORD | sudo -S restart'
     done
 }
