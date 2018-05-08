@@ -16,7 +16,7 @@
 
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' EXIT SIGHUP SIGINT SIGQUIT
-exec 1>>hadoop_extension.log 2>&1
+exec 1>>/mnt/hadoop_extension.log 2>&1
 
 # Output commands and disable history expansion
 set -v +H
