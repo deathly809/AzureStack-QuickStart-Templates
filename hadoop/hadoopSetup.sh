@@ -214,7 +214,7 @@ setup_node () {
         done
     }
 
-    if [[ $ROLE = "*Worker*" ]];
+    if [[ $ROLE == "*Worker*" ]];
     then
         echo -n "Nothing to do for workers"
     elif [[ $ROLE == "*NameNode*" ]];
@@ -247,7 +247,7 @@ preinstall
 
 
 # If a worker node we need to attach the disks
-if [[ "$ROLE" =~ "Worker" ]]; then
+if [[ $ROLE == "*Worker*" ]];
     # Attach all data disks
     attach_disks
 fi
