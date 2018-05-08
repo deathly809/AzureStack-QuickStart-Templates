@@ -136,7 +136,7 @@
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('resourceGroup().name,Microsoft.Compute/virtualMachines',variables('vmName'))]"
+                "[resourceId(resourceGroup().name, 'Microsoft.Compute/virtualMachines',variables('vmName'))]"
             ],
             "apiVersion": "2015-06-15",
             "tags": {
