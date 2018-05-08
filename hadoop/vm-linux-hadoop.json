@@ -96,9 +96,6 @@
         "subnetName": "[concat(variables('defaultName'),'sub')]",
         "virtualNetworkName": "[concat(variables('defaultName'),'vnet')]",
         "loadBalancerName": "[concat(variables('defaultName'),'lb')]",
-        "jumpBoxIpPrefix": "10.0.0.",
-        "masterIpPrefix": "10.0.1.",
-        "workerIpPrefix": "10.0.2.",
         "baseURI": "https://raw.githubusercontent.com/deathly809/AzureStack-QuickStart-Templates/hadoop/hadoop"
     },
     "resources": [
@@ -275,9 +272,6 @@
                     "loadBalancerName": {
                         "value": "[variables('loadBalancerName')]"
                     },
-                    "ipPrefix": {
-                        "value": "[variables('masterIpPrefix')]"
-                    },
                     "baseURI": {
                         "value": "[variables('baseURI')]"
                     }
@@ -326,9 +320,6 @@
                     "virtualNetworkName": {
                         "value": "[variables('virtualNetworkName')]"
                     },
-                    "ipPrefix": {
-                        "value": "[variables('workerIpPrefix')]"
-                    },
                     "networkSecurityGroupName": {
                         "value": "[variables('networkSecurityGroupName')]"
                     },
@@ -376,9 +367,6 @@
                     },
                     "virtualNetworkName": {
                         "value": "[variables('virtualNetworkName')]"
-                    },
-                    "ipPrefix": {
-                        "value": "[variables('jumpBoxIpPrefix')]"
                     },
                     "networkSecurityGroupName": {
                         "value": "[variables('networkSecurityGroupName')]"

@@ -27,9 +27,6 @@
         "virtualNetworkName": {
             "type": "string"
         },
-        "ipPrefix": {
-            "type": "string"
-        },
         "networkSecurityGroupName": {
             "type": "string"
         },
@@ -68,8 +65,7 @@
                     {
                         "name": "privateIpConfiguration",
                         "properties": {
-                            "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[concat(parameters('ipPrefix'),'0')]",
+                            "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }

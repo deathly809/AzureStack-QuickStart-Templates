@@ -30,9 +30,6 @@
         "loadBalancerName": {
             "type": "string"
         },
-        "ipPrefix": {
-            "type": "string"
-        },
         "baseURI": {
             "type": "string"
         }
@@ -75,8 +72,7 @@
                     {
                         "name": "masterIpConfig",
                         "properties": {
-                            "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[concat(parameters('ipPrefix'),copyIndex())]",
+                            "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }
