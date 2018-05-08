@@ -52,7 +52,6 @@
         "masters": [
             "NameNode",
             "ResourceManager",
-            "WebAppProxy",
             "MapReduceJobHistory"
         ],
         "numberMasters": "[length(variables('masters'))]"

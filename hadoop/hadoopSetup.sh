@@ -48,18 +48,21 @@ USERS=("hdfs" "mapred" "yarn")
 # Name of the cluster
 CLUSTER_NAME="$1"
 
+# Number of worker nodes
+WORKERS="$2"
+
 ############################################################
 #
 # 	Install pre-reqs
 #
 #
 preinstall () {
-	# Java Runtime Environment
-	sudo apt-get update;
-	sudo apt-get install --yes default-jre
+    # Java Runtime Environment
+    sudo apt-get update;
+    sudo apt-get install --yes default-jre
 
-	# Setup JAVA
-	echo -e "JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')" >> /etc/profile
+    # Setup JAVA
+    echo -e "JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')" >> /etc/profile
 }
 
 ############################################################
@@ -120,28 +123,28 @@ attach_disks () {
 #
 
 add_users () {
-	# Create hadoop user and group
-	addgroup "hadoop"
+    # Create hadoop user and group
+    addgroup "hadoop"
 
-	# Create users and keys
-	for user in "${USERS[@]}";
-	do
-		# Create user
+    # Create users and keys
+    for user in "${USERS[@]}";
+    do
+        # Create user
         useradd -m $user -G hadoop
         echo "$user:$password" | chpasswd
 
-		# Location of SSH files
-		SSH_DIR=/home/$user/.ssh
+        # Location of SSH files
+        SSH_DIR=/home/$user/.ssh
 
-		# Key name
-		KEY_NAME=$SSH_DIR/id_rsa
+        # Key name
+        KEY_NAME=$SSH_DIR/id_rsa
 
-		# Remove existing (should not be any)
-		rm -rf $KEY_NAME
+        # Remove existing (should not be any)
+        rm -rf $KEY_NAME
 
-		# Generate key with empty passphrase
-		ssh-keygen -t rsa -N "" -f $KEY_NAME
-	done
+        # Generate key with empty passphrase
+        ssh-keygen -t rsa -N "" -f $KEY_NAME
+    done
 }
 
 ############################################################
@@ -152,23 +155,23 @@ add_users () {
 
 install_hadoop () {
 
-	# Download
-	wget "$HADOOP_URI" -O "$HADOOP_FILE_NAME"
-	# Extract
-	tar -xvzf $HADOOP_FILE_NAME
-	# Remove archive
-	rm *.gz
-	# Move to /usr/local
-	mv hadoop* /usr/local/hadoop
+    # Download
+    wget "$HADOOP_URI" -O "$HADOOP_FILE_NAME"
+    # Extract
+    tar -xvzf $HADOOP_FILE_NAME
+    # Remove archive
+    rm *.gz
+    # Move to /usr/local
+    mv hadoop* /usr/local/hadoop
 
-	#
-	# Global profile environment variables
-	#
-	echo -e "export HADOOP_HOME=/usr/local/hadoop" >> /etc/profile
-	echo -e "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin" >> /etc/profile
+    #
+    # Global profile environment variables
+    #
+    echo -e "export HADOOP_HOME=/usr/local/hadoop" >> /etc/profile
+    echo -e "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin" >> /etc/profile
 
-	# Hadoop user own hadoop installation
-	chown :hadoop -R /usr/local/hadoop
+    # Hadoop user own hadoop installation
+    chown :hadoop -R /usr/local/hadoop
 
     if [[ "$ROLE" =~ "Worker" ]];
     then
@@ -177,7 +180,7 @@ install_hadoop () {
         mkdir $MOUNT/tmp_something
 
         # HDFS owns everything on the data disk
-	    chown hdfs:hadoop -R $MOUNT
+        chown hdfs:hadoop -R $MOUNT
     fi
 }
 
@@ -189,36 +192,45 @@ install_hadoop () {
 #
 
 setup_node () {
-	# Format HDFS
-	sudo -H -u hadoop bash -c 'hdfs namenode format'
 
-	if [[ $ROLE = "*Worker*" ]];
-	then
-
-		echo -n "Worker"
-
-	elif [[ $ROLE == "*NameNode*" ]];
-	then
+    setup_master() {
 
         # Copy startup script to correct place
-        cp hadoop.sh /etc/init/hadoop.sh
+        cp ${PWD}/hadoop.sh /etc/init/hadoop.sh
 
-	elif [[ $ROLE == "*ResourceManager*" ]];
-	then
+        # create symlink
+        cd /etc/rc2.d
+        sudo ln -s /etc/init.d/hadoop.sh
+        sudo mv hadoop.sh S70hadoop.sh
+        cd -
 
-		# Copy startup script to correct place
-        cp hadoop.sh /etc/init/hadoop.sh
+        # Create slaves file
+        touch $HADOOP_HOME/etc/hadoop/slaves
+        for i in `seq 0 $((WORKERS - 1))`;
+        do
+            echo "${CLUSTER_NAME}Worker${i}"
+        done
+    }
 
-	elif [[ $ROLE == "*JobHistory*" ]];
-	then
+    # Format HDFS
+    sudo -H -u hadoop bash -c 'hdfs namenode format'
 
-		# Copy startup script to correct place
-        cp hadoop.sh /etc/init/hadoop.sh
-
+    if [[ $ROLE = "*Worker*" ]];
+    then
+        echo -n "Nothing to do for workers"
+    elif [[ $ROLE == "*NameNode*" ]];
+    then
+        setup_master
+    elif [[ $ROLE == "*ResourceManager*" ]];
+    then
+        setup_master
+    elif [[ $ROLE == "*JobHistory*" ]];
+    then
+        setup_master
     else
         echo "ERROR"
         exit 999
-	fi
+    fi
 }
 
 ############################################################

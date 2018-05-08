@@ -1,3 +1,15 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides :    Hadoop
+# Required-Start :
+# Required-Stop :
+# Default-Start :
+# Default-Stop :
+# Short-Description : ensure Hadoop daemons are started.
+### END INIT INFO
+
+set -e
 
 ROLE='UNKNOWN'
 HOST=`hostname`

@@ -180,7 +180,7 @@
                 ],
                 "inboundNatRules": [
                     {
-                        "name": "ssh",
+                        "name": "JumpNode",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
@@ -192,26 +192,14 @@
                         }
                     },
                     {
-                        "name": "JumpNode",
-                        "properties": {
-                            "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
-                            },
-                            "protocol": "tcp",
-                            "frontendPort": 1000,
-                            "backendPort": 1000,
-                            "enableFloatingIP": false
-                        }
-                    },
-                    {
                         "name": "NameNode",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPort": 2000,
-                            "backendPort": 2000,
+                            "frontendPort": 50070,
+                            "backendPort": 50070,
                             "enableFloatingIP": false
                         }
                     },
@@ -222,20 +210,8 @@
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPort": 3000,
-                            "backendPort": 3000,
-                            "enableFloatingIP": false
-                        }
-                    },
-                    {
-                        "name": "WebAppProxy",
-                        "properties": {
-                            "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
-                            },
-                            "protocol": "tcp",
-                            "frontendPort": 4000,
-                            "backendPort": 4000,
+                            "frontendPort": 8088,
+                            "backendPort": 8088,
                             "enableFloatingIP": false
                         }
                     },
@@ -246,8 +222,8 @@
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'frontEndLoadBalancer')]"
                             },
                             "protocol": "tcp",
-                            "frontendPort": 5000,
-                            "backendPort": 5000,
+                            "frontendPort": 19888,
+                            "backendPort": 19888,
                             "enableFloatingIP": false
                         }
                     }
