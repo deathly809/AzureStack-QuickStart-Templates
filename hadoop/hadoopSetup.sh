@@ -214,20 +214,19 @@ setup_node () {
         done
     }
 
-    if [[ $ROLE == "*Worker*" ]];
+    if [[ $ROLE =~ Worker ]];
     then
         echo -n "Nothing to do for workers"
-    elif [[ $ROLE == "*NameNode*" ]];
+    elif [[ $ROLE =~ NameNode ]];
     then
-
         # format HDFS
         sudo -H -u hdfs bash -c "${HADOOP_HOME}/bin/hdfs namenode format"
         setup_master
 
-    elif [[ $ROLE == "*ResourceManager*" ]];
+    elif [[ $ROLE =~ ResourceManager ]];
     then
         setup_master
-    elif [[ $ROLE == "*JobHistory*" ]];
+    elif [[ $ROLE =~ JobHistory ]];
     then
         setup_master
     else
@@ -247,7 +246,8 @@ preinstall
 
 
 # If a worker node we need to attach the disks
-if [[ $ROLE == "*Worker*" ]];
+if [[ $ROLE =~ Worker ]];
+then
     # Attach all data disks
     attach_disks
 fi
