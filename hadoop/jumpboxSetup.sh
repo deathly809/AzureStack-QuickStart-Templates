@@ -48,7 +48,7 @@ PASSWORD="$3"
 #	cluster
 #
 
-NODES=( "${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}WebProxy" "${CLUSTER_NAME}JobHistory")
+NODES=("${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}JobHistory")
 # Add workers
 for i in `seq 1 $NUMBER_NODES)`
 do
