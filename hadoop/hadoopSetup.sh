@@ -198,12 +198,12 @@ setup_node () {
 
     setup_master() {
 
-        # Copy startup script to correct place
+        # Copy startup script to init.d
         cp ${PWD}/hadoop.sh /etc/init.d/hadoop.sh
         chmod +x /etc/init.d/hadoop.sh
 
         # create symlink
-        sudo ln -s /etc/init.d/hadoop.sh /etc/rc2.d/hadoop.sh
+        sudo ln -s /etc/init.d/hadoop.sh /etc/rc2.d
         sudo mv /etc/rc2.d/hadoop.sh /etc/rc2.d/S70hadoop.sh
 
         # Create slaves file

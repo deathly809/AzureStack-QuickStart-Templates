@@ -93,7 +93,7 @@
                     "vmSize": "[parameters('vmSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[variables('defaultName')]",
+                    "computerName": "[variables('vmName')]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "linuxConfiguration": {
@@ -132,11 +132,11 @@
             }
         },
         {
-            "name": "[concat(parameters('clusterName'),'/jumpboxSetup')]",
+            "name": "[concat(variables('vmName'),'/jumpboxSetup')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[variables('vmName')]"
+                "[[resourceId('Microsoft.Compute/virtualMachines',variables('vmName'))]"
             ],
             "apiVersion": "2015-06-15",
             "tags": {
