@@ -76,10 +76,10 @@
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }
-                        },
+                          },
                         "loadBalancerInboundNatRules": [
                             {
-                                "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/','frontEndLoadBalancer/',variables('masters')[copyIndex()])]"
+                                "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/',variables('masters')[copyIndex()])]"
                             }
                         ]
                     }

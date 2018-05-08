@@ -43,7 +43,7 @@
         "imageOffer": "UbuntuServer",
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
-        "nicName": "[concat(variables('defaultName'),'nicworker')]",
+        "nicName": "[concat(variables('defaultName'),'nic')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
