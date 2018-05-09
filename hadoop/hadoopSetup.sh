@@ -142,6 +142,7 @@ add_users () {
 
         # Create directory
         mkdir -p $SSH_DIR
+        touch "$SSH_DIR/authorized_keys"
 
         # Key name
         KEY_NAME=$SSH_DIR/id_rsa
@@ -151,6 +152,8 @@ add_users () {
 
         # Generate key with empty passphrase
         ssh-keygen -t rsa -N "" -f $KEY_NAME
+
+        chwon -R $user:$user /home/$user
     done
 }
 

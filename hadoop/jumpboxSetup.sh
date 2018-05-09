@@ -51,9 +51,9 @@ ADMIN_PASSWORD="$4"
 #	cluster
 #
 
-NODES=("${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}JobHistory")
+NODES=("${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}MapReduceJobHistory")
 # Add workers
-for i in `seq 1 $NUMBER_NODES)`
+for i in `seq 0 $NUMBER_NODES)`;
 do
     worker="${CLUSTER_NAME}Worker$i"
     NODES[$((i + 4))]=$worker
@@ -83,16 +83,16 @@ copy_users () {
     for FROM in ${NODES[@]}; do
         for TO in ${NODES[@]}; do
             for U in ${USERS[@]}; do
-                # Let's log what we are doing
-                echo -n "$FROM -> $TO for $U"
 
-                # Copy public key here
+                echo -e "$FROM -> $TO for $U"
+
+                echo -e "Copy locally"
                 sshpass -p $ADMIN_PASSWORD scp $ADMIN_USER@$FROM:/home/$U/.ssh/id_rsa.pub .
 
-                # Add to remove authorized_keys
-                cat id_rsa.pub | sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO 'cat >> /home/$U/.ssh/authorized_keys'
+                echo -e "Add to remote authorized_keys on host $TO for user $U"
+                cat id_rsa.pub | sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO "sudo tee -a /home/$U/.ssh/authorized_keys"
 
-                # Remove public key
+                echo -e "Remove local copy"
                 rm -f id_rsa.pub
             done
         done
@@ -106,7 +106,8 @@ copy_users () {
 #
 restart_nodes () {
     for N in ${NODES[@]}; do
-        sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO 'echo $PASSWORD | sudo -S restart'
+        echo "Restarting node $N"
+        sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO 'sudo restart'
     done
 }
 
