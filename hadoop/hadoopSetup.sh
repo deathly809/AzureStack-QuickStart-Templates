@@ -131,12 +131,17 @@ add_users () {
     # Create users and keys
     for user in "${USERS[@]}";
     do
+        echo -n "Creating user $user"
+
         # Create user
         useradd -m $user -G hadoop
         echo "$user:$password" | chpasswd
 
         # Location of SSH files
         SSH_DIR=/home/$user/.ssh
+
+        # Create directory
+        mkdir -p $SSH_DIR
 
         # Key name
         KEY_NAME=$SSH_DIR/id_rsa

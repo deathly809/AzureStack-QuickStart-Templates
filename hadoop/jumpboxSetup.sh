@@ -19,7 +19,7 @@ exec 1>>hadoop_extension.log 2>&1
 # Where we mount the data disk
 MOUNT="/media/data"
 # Get the role of this node
-USERS=("hadoop" "hdfs" "mapred" "yarn")
+USERS=("hdfs" "mapred" "yarn")
 # Name of the machine
 HOSTNAME=`hostname`
 
@@ -80,6 +80,8 @@ copy_users () {
     for FROM in ${NODES[@]}; do
         for TO in ${NODES[@]}; do
             for U in ${USERS[@]}; do
+                # Let's log what we are doing
+                echo -n "$FROM -> $TO for $U"
 
                 # Copy public key here
                 sshpass -p $PASSWORD scp $FROM:/home/$U/.ssh/id_rsa.pub .
