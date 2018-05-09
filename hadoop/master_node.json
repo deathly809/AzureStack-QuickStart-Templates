@@ -31,7 +31,7 @@
             "type": "string"
         },
         "numberWorkerNodes": {
-            "type": "string"
+            "type": "int"
         },
         "baseURI": {
             "type": "string"
