@@ -11,6 +11,9 @@
 
 set -e
 
+# Load stuff
+source /etc/profile
+
 ROLE='UNKNOWN'
 HOST=`hostname`
 
@@ -34,15 +37,15 @@ start() {
     echo -n $"Starting $desc: "
     case "$1" in
         NameNode)
-            /bin/su hdfs ${HADOOP_HOME}/hadoop/bin/start-dfs.sh
+            daemon --user hdfs ${HADOOP_HOME}/hadoop/bin/start-dfs.sh
             $RETVAL=$?
         ;;
         ResourceManager)
-            /bin/su yarn ${HADOOP_HOME}/hadoop/bin/start-yarn.sh
+            daemon --user yarn ${HADOOP_HOME}/hadoop/bin/start-yarn.sh
             $RETVAL=$?
         ;;
         MapReduceJobHistory)
-            /bin/su mapred $HADOOP_PREFIX/sbin/mr-jobhistory-daemon.sh --config $HADOOP_CONF_DIR start historyserver
+            daemon --user mapred $HADOOP_PREFIX/sbin/mr-jobhistory-daemon.sh --config $HADOOP_CONF_DIR start historyserver
             $RETVAL=$?
         ;;
     esac

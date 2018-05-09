@@ -64,8 +64,8 @@ preinstall () {
     sudo apt-get install --yes default-jre
 
     # Setup JAVA
-    echo -e "JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')" >> /etc/profile.d/java.sh
-    cat /etc/profile.d/java.sh >> /etc/environment
+    JAVA_HOME=`JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')`
+    echo -e "export JAVA_HOME=$JAVA_HOME" >> /etc/profile.d/java.sh
 }
 
 ############################################################
@@ -167,7 +167,7 @@ add_users () {
             fi
         done
 
-        chwon -R $user:$user /home/$user
+        chown -R $user:$user /home/$user
     done
 }
 
@@ -195,14 +195,13 @@ install_hadoop () {
 
     # Move files to /usr/local
     mkdir -p ${HADOOP_HOME}
-    mv hadoop-2-9-0/* ${HADOOP_HOME}
+    mv hadoop-2.9.0/* ${HADOOP_HOME}
 
     #
     # Global profile environment variables
     #
-    echo -e 'export HADOOP_HOME=/usr/local/hadoop' >> /etc/profile.d/hadoop.sh
-    echo -e 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin' >> /etc/profile.d/hadoop.sh
-    cat /etc/profile.d/hadoop.sh >> /etc/environment
+    echo -e 'export HADOOP_HOME=/usr/local/hadoop'                  >> /etc/profile.d/hadoop.sh
+    echo -e 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin'  >> /etc/profile.d/hadoop.sh
 
     # Hadoop user own hadoop installation
     chown :hadoop -R /usr/local/hadoop
