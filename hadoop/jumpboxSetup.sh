@@ -107,7 +107,7 @@ copy_users () {
 restart_nodes () {
     for N in ${NODES[@]}; do
         echo "Restarting node $N"
-        sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO 'sudo reboot'
+        sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO '{ sleep 1; sudo reboot -f} > /dev/null &'
     done
 }
 

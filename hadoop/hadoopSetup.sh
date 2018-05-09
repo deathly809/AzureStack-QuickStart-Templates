@@ -53,6 +53,9 @@ CLUSTER_NAME="$1"
 # Number of worker nodes
 WORKERS="$2"
 
+# Number of worker nodes
+ADMIN_USER="$3"
+
 ############################################################
 #
 # 	Install pre-reqs
@@ -64,7 +67,8 @@ preinstall () {
     sudo apt-get install --yes default-jre
 
     # Setup JAVA
-    echo -e "JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')" >> /etc/profile
+    echo -e "JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')" >> /etc/profile.d/java.sh
+    cat /etc/profile.d/java.sh >> /etc/environment
 }
 
 ############################################################
@@ -134,7 +138,7 @@ add_users () {
         echo -n "Creating user $user"
 
         # Create user
-        useradd -m $user -G hadoop
+        useradd -m -G hadoop -s /bin/bash $user
         echo "$user:$password" | chpasswd
 
         # Location of SSH files
@@ -177,22 +181,23 @@ install_hadoop () {
 
     # Extract
     tar -xvzf $HADOOP_FILE_NAME
+    rm $HADOOP_FILE_NAMEstart
 
-    # Remove archive
-    rm *.gz
-
-    # Move to /usr/local
+    # Move files to /usr/local
     mkdir -p ${HADOOP_HOME}
-    mv hadoop* ${HADOOP_HOME}
+    mv hadoop-2-9-0/* ${HADOOP_HOME}
 
     #
     # Global profile environment variables
     #
-    echo -e 'export HADOOP_HOME=/usr/local/hadoop' >> /etc/profile
-    echo -e 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin' >> /etc/profile
+    echo -e 'export HADOOP_HOME=/usr/local/hadoop' >> /etc/profile.d/hadoop.sh
+    echo -e 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin' >> /etc/profile.d/hadoop.sh
+    cat /etc/profile.d/hadoop.sh >> /etc/environment
 
     # Hadoop user own hadoop installation
     chown :hadoop -R /usr/local/hadoop
+
+    cp /home/$USER
 
     if [[ "$ROLE" =~ "Worker" ]];
     then

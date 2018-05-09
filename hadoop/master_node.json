@@ -30,6 +30,9 @@
         "loadBalancerName": {
             "type": "string"
         },
+        "numberWorkerNodes": {
+            "type": "string"
+        },
         "baseURI": {
             "type": "string"
         }
@@ -168,7 +171,7 @@
                         "[concat(parameters('baseURI'),'/hadoop.sh')]",
                         "[concat(parameters('baseURI'),'/sources.txt')]"
                     ],
-                    "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'))]"
+                    "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkerNodes'))]"
                 }
             }
         }

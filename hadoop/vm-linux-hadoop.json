@@ -324,6 +324,9 @@
                     "loadBalancerName": {
                         "value": "[variables('loadBalancerName')]"
                     },
+                    "numberWorkerNodes": {
+                        "value": "[parameters('numberWorkerNodes')]"
+                    },
                     "baseURI": {
                         "value": "[variables('baseURI')]"
                     }
