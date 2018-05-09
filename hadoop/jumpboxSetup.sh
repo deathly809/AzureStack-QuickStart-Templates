@@ -40,7 +40,10 @@ CLUSTER_NAME="$1"
 NUMBER_NODES="$2"
 
 # How many worker nodes
-PASSWORD="$3"
+ADMIN_USER="$3"
+
+# How many worker nodes
+ADMIN_PASSWORD="$4"
 
 ############################################################
 #
@@ -84,10 +87,10 @@ copy_users () {
                 echo -n "$FROM -> $TO for $U"
 
                 # Copy public key here
-                sshpass -p $PASSWORD scp $FROM:/home/$U/.ssh/id_rsa.pub .
+                sshpass -p $ADMIN_PASSWORD scp $ADMIN_USER@$FROM:/home/$U/.ssh/id_rsa.pub .
 
                 # Add to remove authorized_keys
-                cat id_rsa.pub | sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $TO 'cat >> /home/$U/.ssh/authorized_keys'
+                cat id_rsa.pub | sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO 'cat >> /home/$U/.ssh/authorized_keys'
 
                 # Remove public key
                 rm -f id_rsa.pub
