@@ -120,3 +120,4 @@ copy_users
 restart_nodes
 
 echo -e "Success"
+exit 0
