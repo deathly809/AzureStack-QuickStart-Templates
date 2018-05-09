@@ -106,7 +106,7 @@ copy_users () {
 #
 restart_nodes () {
     for N in ${NODES[@]}; do
-        sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $TO 'echo $PASSWORD | sudo -S restart'
+        sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO 'echo $PASSWORD | sudo -S restart'
     done
 }
 
