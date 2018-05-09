@@ -225,7 +225,7 @@ setup_node () {
         touch $HADOOP_HOME/etc/hadoop/slaves
         for i in `seq 0 $((WORKERS - 1))`;
         do
-            echo "${CLUSTER_NAME}Worker${i}"
+            echo "${CLUSTER_NAME}Worker${i}" >> $HADOOP_HOME/etc/hadoop/slaves
         done
     }
 
