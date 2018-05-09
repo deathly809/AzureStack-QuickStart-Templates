@@ -53,9 +53,6 @@ CLUSTER_NAME="$1"
 # Number of worker nodes
 WORKERS="$2"
 
-# Number of worker nodes
-ADMIN_USER="$3"
-
 ############################################################
 #
 # 	Install pre-reqs
@@ -132,9 +129,13 @@ add_users () {
     # Create hadoop user and group
     addgroup "hadoop"
 
+    ADMIN_USER=`ls /home/`
+    FILES=$('.profile' '.bashrc')
+
     # Create users and keys
     for user in "${USERS[@]}";
     do
+
         echo -n "Creating user $user"
 
         # Create user
@@ -156,6 +157,15 @@ add_users () {
 
         # Generate key with empty passphrase
         ssh-keygen -t rsa -N "" -f $KEY_NAME
+
+        # Copy missing files
+        for file in ${FILES[@]};
+        do
+            if [ ! -f "/home/$user/$file" ]; then
+                echo "Missing the file $file for user $user"
+                cp "/home/$ADMIN_USER/$file" "/home/$user/$file"
+            fi
+        done
 
         chwon -R $user:$user /home/$user
     done
