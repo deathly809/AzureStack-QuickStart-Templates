@@ -160,42 +160,24 @@ add_users () {
 #
 #
 
-download_hadoop() {
-    # Randomly pick a URI
-    HADOOP_URI=`shuf -n 1 sources.txt`
-
-    wget "$HADOOP_URI" -O "$HADOOP_FILE_NAME" &
-
-
-    wget_pid=$!
-    counter=0
-    timeout=120
-    while [[ -n $(ps -e) | grep "$wget_pid") && "$counter" -lt "$timeout" ]]
-    do
-        sleep 1
-        counter=$(($counter+1))
-    done
-
-    if [[ -n $(ps -e) | grep "$wget_pid") ]]; then
-        kill -s SIGKILL "$wget_pid"
-        rm $HADOOP_FILE_NAME -f
-    else
-        RET_ERR=0
-    fi
-
-}
-
 install_hadoop () {
-    # Download
+
+    # Download Hadoop from a random source
     RET_ERR=1
     while [[ $RET_ERR -ne 0 ]];
-        download_hadoop
+    do
+        HADOOP_URI=`shuf -n 1 sources.txt`
+        echo -n "Downloading from $HADOOP_URI"
+        timeout 120 wget --timeout 30 "$HADOOP_URI" -O "$HADOOP_FILE_NAME"
+        RET_ERR=$?
     done
 
     # Extract
     tar -xvzf $HADOOP_FILE_NAME
+
     # Remove archive
     rm *.gz
+
     # Move to /usr/local
     mkdir -p ${HADOOP_HOME}
     mv hadoop* ${HADOOP_HOME}

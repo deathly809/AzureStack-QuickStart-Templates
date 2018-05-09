@@ -76,7 +76,7 @@
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }
-                          },
+                        },
                         "loadBalancerInboundNatRules": [
                             {
                                 "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/',variables('masters')[copyIndex()])]"
@@ -165,7 +165,8 @@
                 "settings": {
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/hadoopSetup.sh')]",
-                        "[concat(parameters('baseURI'),'/hadoop.sh')]"
+                        "[concat(parameters('baseURI'),'/hadoop.sh')]",
+                        "[concat(parameters('baseURI'),'/sources.txt')]"
                     ],
                     "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'))]"
                 }
