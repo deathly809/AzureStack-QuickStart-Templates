@@ -28,8 +28,8 @@ set -v +H
 #
 #
 
-# Download location of hadoop
-HADOOP_URI='http://ftp.wayne.edu/apache/hadoop/common/hadoop-2.9.0/hadoop-2.9.0.tar.gz'
+# Error code
+RET_ERR=0
 # What we want to call it locally
 HADOOP_FILE_NAME="hadoop.tar.gz"
 # Where we mount the data disk
@@ -155,10 +155,38 @@ add_users () {
 #
 #
 
-install_hadoop () {
+download_hadoop() {
+    # Randomly pick a URI
+    HADOOP_URI=`shuf -n 1 sources.txt`
 
+    wget "$HADOOP_URI" -O "$HADOOP_FILE_NAME" &
+
+
+    wget_pid=$!
+    counter=0
+    timeout=120
+    while [[ -n $(ps -e) | grep "$wget_pid") && "$counter" -lt "$timeout" ]]
+    do
+        sleep 1
+        counter=$(($counter+1))
+    done
+
+    if [[ -n $(ps -e) | grep "$wget_pid") ]]; then
+        kill -s SIGKILL "$wget_pid"
+        rm $HADOOP_FILE_NAME -f
+    else
+        RET_ERR=0
+    fi
+
+}
+
+install_hadoop () {
     # Download
-    wget "$HADOOP_URI" -O "$HADOOP_FILE_NAME"
+    RET_ERR=1
+    while [[ $RET_ERR -ne 0 ]];
+        download_hadoop
+    done
+
     # Extract
     tar -xvzf $HADOOP_FILE_NAME
     # Remove archive
