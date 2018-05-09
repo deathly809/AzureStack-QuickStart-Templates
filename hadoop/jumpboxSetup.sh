@@ -7,7 +7,7 @@
 
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' EXIT SIGHUP SIGINT SIGQUIT
-exec 1>>hadoop_extension.log 2>&1
+exec 1>> /mnt/hadoop_extension.log 2>&1
 # Everything below will go to the file 'hadoop_extension.log':
 
 ############################################################
@@ -53,7 +53,7 @@ ADMIN_PASSWORD="$4"
 
 NODES=("${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}MapReduceJobHistory")
 # Add workers
-for i in `seq 0 $NUMBER_NODES)`;
+for i in `seq 0 $((NUMBER_NODES - 1))`;
 do
     worker="${CLUSTER_NAME}Worker$i"
     NODES[$((i + 4))]=$worker
@@ -107,7 +107,7 @@ copy_users () {
 restart_nodes () {
     for N in ${NODES[@]}; do
         echo "Restarting node $N"
-        sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO 'sudo restart'
+        sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO 'sudo reboot'
     done
 }
 

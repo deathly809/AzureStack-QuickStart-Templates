@@ -44,7 +44,7 @@
         "imageSku": "16.04-LTS",
         "location": "[resourceGroup().location]",
         "nicName": "[concat(variables('defaultName'),'nicjumpbox')]",
-        "vmName": "[concat(variables('defaultName'),'jumpbox')]",
+        "vmName": "[concat(variables('defaultName'),'Jumpbox')]",
         "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
