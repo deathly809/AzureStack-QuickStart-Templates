@@ -15,7 +15,7 @@
         "vmSize": {
             "type": "string"
         },
-        "numberWorkers": {
+        "numberWorkerNodes": {
             "type": "int"
         },
         "dataDiskSize": {
@@ -57,7 +57,7 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "nicLoop",
-                "count": "[parameters('numberWorkers')]"
+                "count": "[parameters('numberWorkerNodes')]"
             },
             "properties": {
                 "networkSecurityGroup": {
@@ -84,7 +84,7 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "workerNodes",
-                "count": "[parameters('numberWorkers')]"
+                "count": "[parameters('numberWorkerNodes')]"
             },
             "dependsOn": [
                 "nicLoop"
@@ -153,7 +153,7 @@
             ],
             "copy": {
                 "name": "workerHadoopSetup",
-                "count": "[parameters('numberWorkers')]"
+                "count": "[parameters('numberWorkerNodes')]"
             },
             "apiVersion": "2015-06-15",
             "tags": {
@@ -170,7 +170,7 @@
                         "[concat(parameters('baseURI'),'/hadoop.sh')]",
                         "[concat(parameters('baseURI'),'/sources.txt')]"
                     ],
-                    "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkers'))]"
+                    "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkerNodes'))]"
                 }
             }
         }

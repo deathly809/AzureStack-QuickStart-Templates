@@ -15,7 +15,7 @@
         "vmSize": {
             "type": "string"
         },
-        "numberWorkers": {
+        "numberWorkerNodes": {
             "type": "int"
         },
         "storageAccountName": {
@@ -151,7 +151,7 @@
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/jumpboxSetup.sh')]"
                     ],
-                    "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkers'),' ',parameters('adminUsername'),' ',parameters('adminPassword'))]"
+                    "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkerNodes'),' ',parameters('adminUsername'),' ',parameters('adminPassword'))]"
                 }
             }
         }

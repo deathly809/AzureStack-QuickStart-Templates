@@ -257,7 +257,7 @@
                     "vmSize": {
                         "value": "[parameters('workerNodeVMSize')]"
                     },
-                    "numberWorkers": {
+                    "numberWorkerNodes": {
                         "value": "[parameters('numberWorkerNodes')]"
                     },
                     "dataDiskSize": {
@@ -360,7 +360,7 @@
                     "vmSize": {
                         "value": "[parameters('masterNodeVMSize')]"
                     },
-                    "numberWorkers": {
+                    "numberWorkerNodes": {
                         "value": "[parameters('numberWorkerNodes')]"
                     },
                     "storageAccountName": {
