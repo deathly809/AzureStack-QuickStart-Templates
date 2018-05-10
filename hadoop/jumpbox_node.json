@@ -69,6 +69,11 @@
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/LoadBalancerBackend')]"
+                                }
+                            ],
                             "loadBalancerInboundNatRules": [
                                 {
                                     "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/','JumpNode')]"

@@ -79,104 +79,111 @@
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },
-                            "loadBalancerInboundNatRules": [
-                                {
-                                    "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/',variables('masters')[copyIndex()])]"
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "comments": "These are the master nodes.",
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(variables('vmName'),variables('masters')[copyIndex()])]",
-            "location": "[variables('location')]",
-            "copy": {
-                "name": "masterNodes",
-                "count": "[variables('numberMasters')]"
-            },
-            "dependsOn": [
-                "masterNics"
-            ],
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
-                },
-                "osProfile": {
-                    "computerName": "[concat(parameters('clusterName'),variables('masters')[copyIndex()])]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]",
-                    "linuxConfiguration": {
-                        "disablePasswordAuthentication": false
-                    }
-                },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "[variables('imagePublisher')]",
-                        "offer": "[variables('imageOffer')]",
-                        "sku": "[variables('imageSku')]",
-                        "version": "latest"
-                    },
-                    "osDisk": {
-                        "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()])]",
-                        "vhd": {
-                            "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('master',copyIndex(),'/')),'os.vhd')]"
+                            : "[variables('subnetRef')]"
                         },
-                        "caching": "ReadWrite",
-                        "createOption": "FromImage"
-                    }
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),variables('masters')[copyIndex()]))]"
-                        }
-                    ]
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": "true",
-                        "storageUri": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+                        "loadBalancerBackendAddressPools": [
+                            {
+                                "id": "[concat(variables('loadBalancerId'), '/backendAddressPools/LoadBalancerBackend')]"
+                            }
+                        ],
+                        "loadBalancerInboundNatRules": [
+                            {
+                                "id": "[concat(variables('loadBalancerId'),'/inboundNatRules/',variables('masters')[copyIndex()])]"
+                            }
+                        ]
                     }
                 }
-            }
+            ]
+        }
+    },
+    {
+        "comments": "These are the master nodes.",
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[concat(variables('vmName'),variables('masters')[copyIndex()])]",
+        "location": "[variables('location')]",
+        "copy": {
+            "name": "masterNodes",
+            "count": "[variables('numberMasters')]"
         },
-        {
-            "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()],'/hadoopSetup')]",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "masterNodes"
-            ],
-            "copy": {
-                "name": "masterHadoopSetup",
-                "count": "[variables('numberMasters')]"
+        "dependsOn": [
+            "masterNics"
+        ],
+        "properties": {
+            "hardwareProfile": {
+                "vmSize": "[parameters('vmSize')]"
             },
-            "apiVersion": "2015-06-15",
-            "tags": {
-                "displayName": "hadoopSetup"
+            "osProfile": {
+                "computerName": "[concat(parameters('clusterName'),variables('masters')[copyIndex()])]",
+                "adminUsername": "[parameters('adminUsername')]",
+                "adminPassword": "[parameters('adminPassword')]",
+                "linuxConfiguration": {
+                    "disablePasswordAuthentication": false
+                }
             },
-            "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.0",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "fileUris": [
-                        "[concat(parameters('baseURI'),'/hadoopSetup.sh')]",
-                        "[concat(parameters('baseURI'),'/hadoop.sh')]",
-                        "[concat(parameters('baseURI'),'/config/sources.txt')]",
-                        "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/core-site.xml')]"
-                    ],
-                    "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkerNodes'))]"
+            "storageProfile": {
+                "imageReference": {
+                    "publisher": "[variables('imagePublisher')]",
+                    "offer": "[variables('imageOffer')]",
+                    "sku": "[variables('imageSku')]",
+                    "version": "latest"
+                },
+                "osDisk": {
+                    "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()])]",
+                    "vhd": {
+                        "uri": "[concat(concat(reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], concat('master',copyIndex(),'/')),'os.vhd')]"
+                    },
+                    "caching": "ReadWrite",
+                    "createOption": "FromImage"
+                }
+            },
+            "networkProfile": {
+                "networkInterfaces": [
+                    {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),variables('masters')[copyIndex()]))]"
+                    }
+                ]
+            },
+            "diagnosticsProfile": {
+                "bootDiagnostics": {
+                    "enabled": "true",
+                    "storageUri": "[reference(resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
                 }
             }
         }
-    ],
-    "outputs": {}
+    },
+    {
+        "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()],'/hadoopSetup')]",
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "masterNodes"
+        ],
+        "copy": {
+            "name": "masterHadoopSetup",
+            "count": "[variables('numberMasters')]"
+        },
+        "apiVersion": "2015-06-15",
+        "tags": {
+            "displayName": "hadoopSetup"
+        },
+        "properties": {
+            "publisher": "Microsoft.Azure.Extensions",
+            "type": "CustomScript",
+            "typeHandlerVersion": "2.0",
+            "autoUpgradeMinorVersion": "true",
+            "settings": {
+                "fileUris": [
+                    "[concat(parameters('baseURI'),'/hadoopSetup.sh')]",
+                    "[concat(parameters('baseURI'),'/hadoop.sh')]",
+                    "[concat(parameters('baseURI'),'/config/sources.txt')]",
+                    "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
+                    "[concat(parameters('baseURI'),'/config/core-site.xml')]"
+                ],
+                "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkerNodes'))]"
+            }
+        }
+    }
+],
+"outputs": {}
 }
