@@ -64,7 +64,7 @@
             "name": "[concat(variables('nicName'),variables('masters')[copyIndex()])]",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[concat(variables('loadBalancerId'),'/inboundNatRules/',variables('masters')[copyIndex()])]"
+                "[resourceId('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'),'inboundNatRules',variables('masters')[copyIndex()])]"
             ],
             "copy": {
                 "name": "masterNics",
