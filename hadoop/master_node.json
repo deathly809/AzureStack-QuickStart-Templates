@@ -63,6 +63,9 @@
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(variables('nicName'),variables('masters')[copyIndex()])]",
             "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat(variables('loadBalancerId'),'/inboundNatRules/',variables('masters')[copyIndex()])]"
+            ],
             "copy": {
                 "name": "masterNics",
                 "count": "[variables('numberMasters')]"
@@ -108,6 +111,9 @@
                 "masterNics"
             ],
             "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets','hadoop')]"
+                },
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
