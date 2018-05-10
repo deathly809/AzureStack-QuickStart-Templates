@@ -64,7 +64,7 @@ preinstall () {
     sudo apt-get install --yes default-jre
 
     # Setup JAVA
-    JAVA_HOME=`JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')`
+    JAVA_HOME=`readlink -f /usr/bin/java | sed 's:/bin/java::'`
     echo -e "export JAVA_HOME=$JAVA_HOME" >> /etc/profile.d/java.sh
 }
 
@@ -167,6 +167,10 @@ add_users () {
             fi
         done
 
+        # Disable key checking
+        echo -e "Host *" >> /home/$user/.ssh/config
+        echo -e "    StrictHostKeyChecking no" >> /home/$user/.ssh/config
+
         chown -R $user:$user /home/$user
     done
 }
@@ -197,14 +201,25 @@ install_hadoop () {
     mkdir -p ${HADOOP_HOME}
     mv hadoop-2.9.0/* ${HADOOP_HOME}
 
+    # Copy configuration files
+    cp core-site.xml ${HADOOP_HOME}/etc/hadoop/ -f
+    cp mapred-site.xml ${HADOOP_HOME}/etc/hadoop/ -f
+
+    # Set environment variable for JAVA_HOME
+    sed -i -e "s+\${JAVA_HOME}+$JAVA_HOME+g" $HADOOP_HOME/etc/hadoop/hadoop_env.sh
+
     #
     # Global profile environment variables
     #
-    echo -e 'export HADOOP_HOME=/usr/local/hadoop'                  >> /etc/profile.d/hadoop.sh
+    echo -e 'export HADOOP_HOME=$HADOOP_HOME'                       >> /etc/profile.d/hadoop.sh
     echo -e 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin'  >> /etc/profile.d/hadoop.sh
 
     # Hadoop user own hadoop installation
-    chown :hadoop -R /usr/local/hadoop
+    chown :hadoop -R $HADOOP_HOME
+
+    # Hadoop group can do anything owner can do
+    chmod -R g=u $HADOOP_HOME
+
 
     cp /home/$USER
 
@@ -251,9 +266,14 @@ setup_node () {
         echo -n "Nothing to do for workers"
     elif [[ $ROLE =~ NameNode ]];
     then
+
+        setup_master
+
+        # Setup configuration values
+
+
         # format HDFS
         sudo -H -u hdfs bash -c "${HADOOP_HOME}/bin/hdfs namenode format"
-        setup_master
 
     elif [[ $ROLE =~ ResourceManager ]];
     then

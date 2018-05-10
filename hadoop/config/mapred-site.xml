@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property>
+        <description>Override the default amount of memory for map jobs.</description>
+        <name>mapreduce.map.mermory.mb</name>
+        <value>2048</value>
+    </property>
+    <property>
+        <description>Override the default amount of memory for reduce jobs.</description>
+        <name>mapreduce.reduce.mermory.mb</name>
+        <value>2048</value>
+    </property>
+</configuration>

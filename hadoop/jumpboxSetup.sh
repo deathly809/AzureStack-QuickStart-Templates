@@ -80,6 +80,11 @@ preinstall () {
 # 	Copy public keys from all nodes to all other nodes.
 #
 copy_users () {
+
+    # Disable key checking
+    echo -e "Host *" >> /home/$user/.ssh/config
+    echo -e "    StrictHostKeyChecking no" >> /home/$user/.ssh/config
+
     for FROM in ${NODES[@]}; do
         for TO in ${NODES[@]}; do
             for U in ${USERS[@]}; do

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property>
+        <description>Make the mounted data-disk as the local store.</description>
+        <name>hadoop.tmp.dir</name>
+        <value>/media/data</value>
+    </property>
+</configuration>
