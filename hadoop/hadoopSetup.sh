@@ -211,7 +211,7 @@ install_hadoop () {
     #
     # Global profile environment variables
     #
-    echo -e 'export HADOOP_HOME=$HADOOP_HOME'                       >> /etc/profile.d/hadoop.sh
+    echo -e "export HADOOP_HOME=$HADOOP_HOME"                       >> /etc/profile.d/hadoop.sh
     echo -e 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin'  >> /etc/profile.d/hadoop.sh
 
     # Hadoop user own hadoop installation
