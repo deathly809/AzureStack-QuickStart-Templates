@@ -220,18 +220,11 @@ install_hadoop () {
     # Hadoop group can do anything owner can do
     chmod -R g=u $HADOOP_HOME
 
-
     cp /home/$USER
 
-    if [[ "$ROLE" =~ "Worker" ]];
-    then
-        # Create HDFS directories
-        mkdir $MOUNT/tmp_fs
-        mkdir $MOUNT/tmp_something
+    # HDFS owns everything on the data disk
+    chown hdfs:hadoop -R $MOUNT
 
-        # HDFS owns everything on the data disk
-        chown hdfs:hadoop -R $MOUNT
-    fi
 }
 
 
@@ -247,7 +240,7 @@ setup_node () {
 
         # Copy startup script to init.d
         cp ${PWD}/hadoop.sh /etc/init.d/hadoop.sh
-        chmod +x /etc/init.d/hadoop.sh
+        chmod 755 /etc/init.d/hadoop.sh
 
         # create symlink
         sudo ln -s /etc/init.d/hadoop.sh /etc/rc2.d
@@ -266,11 +259,7 @@ setup_node () {
         echo -n "Nothing to do for workers"
     elif [[ $ROLE =~ NameNode ]];
     then
-
         setup_master
-
-        # Setup configuration values
-
 
         # format HDFS
         sudo -H -u hdfs bash -c "${HADOOP_HOME}/bin/hdfs namenode format"
@@ -296,13 +285,8 @@ setup_node () {
 # Pre-install all required programs
 preinstall
 
-
-# If a worker node we need to attach the disks
-if [[ $ROLE =~ Worker ]];
-then
-    # Attach all data disks
-    attach_disks
-fi
+# Attach all data disks
+attach_disks
 
 # Add all Hadoop users
 add_users

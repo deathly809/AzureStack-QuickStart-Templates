@@ -20,10 +20,10 @@ HOST=`hostname`
 if [[ "$HOST" =~ "NameNode" ]];
 then
     ROLE='NameNode'
-elif if [[ "$HOST" =~ "ResourceManager" ]];
+elif [[ "$HOST" =~ "ResourceManager" ]];
 then
     ROLE='ResourceManager'
-elif if [[ "$HOST" =~ "MapReduceJobHistory" ]];
+elif [[ "$HOST" =~ "MapReduceJobHistory" ]];
 then
     ROLE='MapReduceJobHistory'
 else
