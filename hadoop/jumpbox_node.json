@@ -65,7 +65,8 @@
                     {
                         "name": "privateIpConfiguration",
                         "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "10.0.0.10",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },

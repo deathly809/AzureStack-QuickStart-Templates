@@ -75,7 +75,8 @@
                     {
                         "name": "[concat('ipConfig',variables('masters')[copyIndex()])]",
                         "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat('10.0.0.', add(11,copyIndex()))]",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },

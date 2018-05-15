@@ -40,6 +40,8 @@ ROLE=`hostname`
 USERS=("hdfs" "mapred" "yarn")
 # Hadoop home
 HADOOP_HOME=/usr/local/hadoop
+# Admin USER
+ADMIN_USER=`ls /home/`
 
 ############################################################
 #
@@ -129,7 +131,6 @@ add_users () {
     # Create hadoop user and group
     addgroup "hadoop"
 
-    ADMIN_USER=`ls /home/`
     FILES=$('.profile' '.bashrc')
 
     # Create users and keys
@@ -157,6 +158,9 @@ add_users () {
 
         # Generate key with empty passphrase
         ssh-keygen -t rsa -N "" -f $KEY_NAME
+
+        # Add to my own autorhized keys
+        cat "/home/$user/.ssh/id_rsa.pub >> /home/$user/.ssh/authorized_keys"
 
         # Copy missing files
         for file in ${FILES[@]};
@@ -205,8 +209,9 @@ install_hadoop () {
     cp core-site.xml ${HADOOP_HOME}/etc/hadoop/ -f
     cp mapred-site.xml ${HADOOP_HOME}/etc/hadoop/ -f
 
+
     # Set environment variable for JAVA_HOME
-    sed -i -e "s+\${JAVA_HOME}+$JAVA_HOME+g" $HADOOP_HOME/etc/hadoop/hadoop_env.sh
+    sed -i -e "s+\${JAVA_HOME}+'$JAVA_HOME'+g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh
 
     #
     # Global profile environment variables
@@ -219,8 +224,6 @@ install_hadoop () {
 
     # Hadoop group can do anything owner can do
     chmod -R g=u $HADOOP_HOME
-
-    cp /home/$USER
 
     # HDFS owns everything on the data disk
     chown hdfs:hadoop -R $MOUNT
