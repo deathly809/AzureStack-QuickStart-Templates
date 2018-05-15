@@ -22,6 +22,11 @@ exec 1>>/mnt/hadoop_extension.log 2>&1
 set -v +H
 
 
+# Reverse DNS fix
+IP=`hostname -I`
+HOST=`hostname`
+echo -n "$IP $HOST" >> /etc/hosts
+
 ############################################################
 #
 # 	Constants
@@ -83,13 +88,16 @@ attach_disks () {
     #
 
     # List all disks.
-    DISKS=`lsblk -d | grep "disk" | grep -v "^f"  | awk -F ' ' '{print $1}'`
+    DISKS=`lsblk -d | grep "disk" | awk -F ' ' '{print $1}'`
+    echo -n "DISKS=$DISKS"
 
     # List all partitions.
     PARTS='lsblk | grep part'
+    echo -n "PARTS=$PARTS"
 
     # Get the disk without any partitions.
     DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
+    echo -n "DD=$DD"
 
     #
     # Format/Create partitions
@@ -108,12 +116,21 @@ attach_disks () {
     #
 
     # Get the UUID
-    UUID=`blkid /dev/${DD}1 -s UUID -o value`
+    blkid -s none
+    UUID=`blkid -s UUID -o value /dev/${DD}1`
+    if [ -z "$UUID" ]; then
+        echo "blkid failed to get UUID"
+        UUID=`ls /dev/disk/by-uuid -t | head -n 1`
+    fi
+
+    echo "UUID=$UUID"
+
     # Validate not already in FSTAB (Should never happen).
     grep "$UUID" /etc/fstab > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         # Append to the end of FSTAB
-        LINE="UUID=\"$UUID\"\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
+        LINE="UUID=$UUID\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
+        echo "Adding '$LINE' to FSTAB"
         echo -e "$LINE" >> /etc/fstab
     fi
 
@@ -141,7 +158,6 @@ add_users () {
 
         # Create user
         useradd -m -G hadoop -s /bin/bash $user
-        echo "$user:$password" | chpasswd
 
         # Location of SSH files
         SSH_DIR=/home/$user/.ssh
@@ -158,8 +174,8 @@ add_users () {
         # Generate key with empty passphrase
         ssh-keygen -t rsa -N "" -f $KEY_NAME
 
-        # Add to my own autorhized keys
-        cat "/home/$user/.ssh/id_rsa.pub >> $SSH_DIR/authorized_keys"
+        # Add to my own authorized keys
+        cat $SSH_DIR/id_rsa.pub >> $SSH_DIR/authorized_keys
 
         # Copy missing files
         for file in ${FILES[@]};
@@ -198,7 +214,7 @@ install_hadoop () {
 
     # Extract
     tar -xvzf $HADOOP_FILE_NAME
-    rm $HADOOP_FILE_NAMEstart
+    rm $HADOOP_FILE_NAME
 
     # Move files to /usr/local
     mkdir -p ${HADOOP_HOME}
@@ -236,11 +252,6 @@ install_hadoop () {
 #
 
 setup_node () {
-
-    # Reverse DNS fix
-    $IP = `hostname -I`
-    $HOST=`hostname`
-    echo -n "$IP $HOST" >> /etc/hosts
 
     setup_master() {
 
