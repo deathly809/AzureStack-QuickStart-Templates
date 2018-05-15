@@ -98,7 +98,7 @@ attach_disks () {
     sudo parted -a opt /dev/$DD mkpart primary ext4 0% 100%
 
     # write file-system lazily for performance reasons.
-    sudo mkfs.ext4 -L datapartition /dev/${DD}1 -F -E lazy_itable_init=1
+    sudo mkfs.ext4 -L datapartition /dev/${DD}1 -F
 
     # Create mount point
     mkdir $MOUNT -p
@@ -108,7 +108,7 @@ attach_disks () {
     #
 
     # Get the UUID
-    UUID=`blkid /dev/${dd}1 -s UUID -o value`
+    UUID=`blkid /dev/${DD}1 -s UUID -o value`
     # Validate not already in FSTAB (Should never happen).
     grep "$UUID" /etc/fstab > /dev/null 2>&1
     if [ $? -ne 0 ]; then
@@ -148,7 +148,6 @@ add_users () {
 
         # Create directory
         mkdir -p $SSH_DIR
-        touch "$SSH_DIR/authorized_keys"
 
         # Key name
         KEY_NAME=$SSH_DIR/id_rsa
@@ -160,7 +159,7 @@ add_users () {
         ssh-keygen -t rsa -N "" -f $KEY_NAME
 
         # Add to my own autorhized keys
-        cat "/home/$user/.ssh/id_rsa.pub >> /home/$user/.ssh/authorized_keys"
+        cat "/home/$user/.ssh/id_rsa.pub >> $SSH_DIR/authorized_keys"
 
         # Copy missing files
         for file in ${FILES[@]};
@@ -238,6 +237,11 @@ install_hadoop () {
 #
 
 setup_node () {
+
+    # Reverse DNS fix
+    $IP = `hostname -I`
+    $HOST=`hostname`
+    echo -n "$IP $HOST" >> /etc/hosts
 
     setup_master() {
 

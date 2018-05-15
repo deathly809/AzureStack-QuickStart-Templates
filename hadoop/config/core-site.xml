@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://CLUSTER_NAMENameNode</value>
+    </property>
+
     <property>
         <description>Make the mounted data-disk as the local store.</description>
         <name>hadoop.tmp.dir</name>
