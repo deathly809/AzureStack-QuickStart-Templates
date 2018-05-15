@@ -205,11 +205,10 @@ install_hadoop () {
     mv hadoop-2.9.0/* ${HADOOP_HOME}
 
     # Copy configuration files
-    cp core-site.xml ${HADOOP_HOME}/etc/hadoop/ -f
-    cp mapred-site.xml ${HADOOP_HOME}/etc/hadoop/ -f
+    cp *.xml ${HADOOP_HOME}/etc/hadoop/ -f
 
-
-    # Set environment variable for JAVA_HOME
+    # Update hadoop configuration
+    sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/core-site.xml
     sed -i -e "s+\${JAVA_HOME}+'$JAVA_HOME'+g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh
 
     #
