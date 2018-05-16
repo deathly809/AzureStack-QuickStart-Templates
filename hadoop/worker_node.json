@@ -67,8 +67,7 @@
                     {
                         "name": "workerIpConfig",
                         "properties": {
-                            "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[concat('10.0.1.', add(3,copyIndex()))]",
+                            "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }

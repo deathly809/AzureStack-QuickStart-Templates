@@ -219,7 +219,7 @@ install_hadoop () {
     done
 
     # Extract
-    tar -xvzf $HADOOP_FILE_NAME
+    tar -xvzf $HADOOP_FILE_NAME > /dev/null
     rm $HADOOP_FILE_NAME
 
     # Move files to /usr/local
