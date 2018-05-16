@@ -88,12 +88,18 @@ attach_disks () {
     #
 
     # List all disks.
+    echo -n "lsblk:"
+    lsblk
+    echo -n " "
+
     DISKS=`lsblk -d | grep "disk" | awk -F ' ' '{print $1}'`
     echo -n "DISKS=$DISKS"
+    echo
 
     # List all partitions.
-    PARTS='lsblk | grep part'
+    PARTS=`lsblk | grep part`
     echo -n "PARTS=$PARTS"
+    echo
 
     # Get the disk without any partitions.
     DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
@@ -279,7 +285,7 @@ setup_node () {
         setup_master
 
         # format HDFS
-        sudo -H -u hdfs bash -c "${HADOOP_HOME}/bin/hdfs namenode format"
+        sudo -H -u hdfs bash -c "${HADOOP_HOME}/bin/hdfs namenode -format"
 
     elif [[ $ROLE =~ ResourceManager ]];
     then
