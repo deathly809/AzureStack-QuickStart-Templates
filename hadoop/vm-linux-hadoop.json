@@ -349,7 +349,6 @@
             "name": "masterNodeTemplate",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "workerNodeTemplate",
                 "[variables('storageAccountName')]",
                 "[variables('loadBalancerName')]"
             ],
