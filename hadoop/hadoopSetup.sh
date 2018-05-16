@@ -27,6 +27,12 @@ IP=`hostname -I`
 HOST=`hostname`
 echo -n "$IP $HOST" >> /etc/hosts
 
+function Log() {
+    echo
+    echo -e $1
+    echo
+}
+
 ############################################################
 #
 # 	Constants
@@ -87,32 +93,57 @@ attach_disks () {
     # Locate the datadisk
     #
 
+    Log "Everything under /dev\n$(ls /dev)"
+
+
     # List all disks.
-    echo -n "lsblk:"
-    lsblk
-    echo -n " "
+    Log "lsblk: \n$(lsblk)"
+
 
     DISKS=`lsblk -d | grep "disk" | awk -F ' ' '{print $1}'`
-    echo -n "DISKS=$DISKS"
-    echo
+    Log "DISKS=$DISKS"
 
     # List all partitions.
     PARTS=`lsblk | grep part`
-    echo -n "PARTS=$PARTS"
-    echo
+    Log "PARTS=$PARTS"
 
     # Get the disk without any partitions.
     DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
-    echo -n "DD=$DD"
+    Log "DD=$DD"
 
     #
     # Format/Create partitions
     #
-    sudo parted /dev/$DD mklabel gpt
-    sudo parted -a opt /dev/$DD mkpart primary ext4 0% 100%
+
+    Log "Creating label"
+    n=0
+    until [ $n -ge 5 ];
+    do
+        sudo parted /dev/$DD mklabel gpt && break
+        n=$[$n + 1]
+        Log "Label creation failures $n"
+        sleep 10
+    done
+
+    Log "Creating partition"
+    n=0
+    until [ $n -ge 5 ];
+    do
+        sudo parted -a opt /dev/$DD mkpart primary ext4 0% 100% && break
+        n=$[$n + 1]
+        Log "Partition creation failures $n"
+        sleep 10
+    done
 
     # write file-system lazily for performance reasons.
-    sudo mkfs.ext4 -L datapartition /dev/${DD}1 -F
+    n=0
+    until [ $n -ge 5 ];
+    do
+        sudo mkfs.ext4 -L datapartition /dev/${DD}1 -F && break
+        n=$[$n + 1]
+        Log "FS creation failures $n"
+        sleep 10
+    done
 
     # Create mount point
     mkdir $MOUNT -p
@@ -124,21 +155,17 @@ attach_disks () {
     # Get the UUID
     blkid -s none
     UUID=`blkid -s UUID -o value /dev/${DD}1`
+
     if [ -z "$UUID" ]; then
-        echo "blkid failed to get UUID"
-        UUID=`ls /dev/disk/by-uuid -t | head -n 1`
-    fi
-
-    echo "UUID=$UUID"
-
-    # Validate not already in FSTAB (Should never happen).
-    grep "$UUID" /etc/fstab > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        # Append to the end of FSTAB
+        # Fall back to disk
+        LINE="$/dev/${DD}1\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
+    else
+        # Use UUID
         LINE="UUID=$UUID\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
-        echo "Adding '$LINE' to FSTAB"
-        echo -e "$LINE" >> /etc/fstab
     fi
+
+    echo "Adding '$LINE' to FSTAB"
+    echo -e "$LINE" >> /etc/fstab
 
     # mount
     mount $MOUNT
