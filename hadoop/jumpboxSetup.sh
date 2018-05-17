@@ -15,9 +15,8 @@ exec 1>> /mnt/hadoop_extension.log 2>&1
 # 	Constants
 #
 #
-
-# Where we mount the data disk
-MOUNT="/media/data"
+# Local hadoop archive
+HADOOP_FILE_NAME="hadoop.tar.gz"
 # Get the role of this node
 USERS=("hdfs" "mapred" "yarn")
 # Name of the machine
@@ -110,11 +109,69 @@ copy_users () {
 #   cause Hadoop to start on each node.
 #
 restart_nodes () {
+    REBOOT_CMD='nohup sh -c "sleep 1 && sudo reboot" > /dev/null 2&>1 &'
     for N in ${NODES[@]}; do
         echo "Restarting node $N"
-        sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=10 $ADMIN_USER@$TO 'sudo reboot'
+        sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=10 $ADMIN_USER@$N $REBOOT_CMD
     done
 }
+
+
+############################################################
+#
+#	Downloads and extracts hadoop into the correct folder
+#
+#
+
+install_hadoop () {
+
+    # Download Hadoop from a random source
+    RET_ERR=1
+    while [[ $RET_ERR -ne 0 ]];
+    do
+        HADOOP_URI=`shuf -n 1 sources.txt`
+        echo -n "Downloading from $HADOOP_URI"
+        timeout 120 wget --timeout 30 "$HADOOP_URI" -O "$HADOOP_FILE_NAME"
+        RET_ERR=$?
+    done
+
+    # Extract
+    tar -xvzf $HADOOP_FILE_NAME > /dev/null
+    rm $HADOOP_FILE_NAME
+
+    # Move files to /usr/local
+    mkdir -p ${HADOOP_HOME}
+    mv hadoop-2.9.0/* ${HADOOP_HOME}
+
+    # Create log directory
+    mkdir ${HADOOP_HOME}/logs
+
+    # Copy configuration files
+    cp *.xml ${HADOOP_HOME}/etc/hadoop/ -f
+
+    # Setup permissions
+    chmod 664 *.xml
+    chown $ADMIN_USER *.xml
+
+    # Update hadoop configuration
+    sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/core-site.xml
+    sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+    sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/yarn-site.xml
+    sed -i -e "s+\${JAVA_HOME}+'$JAVA_HOME'+g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh
+
+    #
+    # Global profile environment variables
+    #
+    echo -e "export HADOOP_HOME=$HADOOP_HOME"                       >> /etc/profile.d/hadoop.sh
+    echo -e 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin'  >> /etc/profile.d/hadoop.sh
+
+    # Hadoop group owns hadoop installation
+    chown $ADMIN_USER:hadoop -R $HADOOP_HOME
+
+    # Hadoop group can do anything owner can do
+    chmod -R g=u $HADOOP_HOME
+}
+
 
 # Pre-install all required programs
 preinstall
@@ -124,6 +181,12 @@ copy_users
 
 # Restart all Hadoop nodes
 restart_nodes
+
+# install hadoop.
+install_hadoop
+
+# install GUI
+nohup bash -c 'sudo apt-get install --yes lubuntu-desktop && sudo reboot' &
 
 echo -e "Success"
 exit 0

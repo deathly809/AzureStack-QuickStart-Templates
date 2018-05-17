@@ -74,7 +74,7 @@ WORKERS="$2"
 preinstall () {
     # Java Runtime Environment
     sudo apt-get update;
-    sudo apt-get install --yes default-jre
+    sudo apt-get install --yes default-jre htop
 
     # Setup JAVA
     JAVA_HOME=`readlink -f /usr/bin/java | sed 's:/bin/java::'`
@@ -253,11 +253,20 @@ install_hadoop () {
     mkdir -p ${HADOOP_HOME}
     mv hadoop-2.9.0/* ${HADOOP_HOME}
 
+    # Create log directory
+    mkdir ${HADOOP_HOME}/logs
+
     # Copy configuration files
     cp *.xml ${HADOOP_HOME}/etc/hadoop/ -f
 
+    # Setup permissions
+    chmod 664 *.xml
+    chown $ADMIN_USER *.xml
+
     # Update hadoop configuration
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/core-site.xml
+    sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+    sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/yarn-site.xml
     sed -i -e "s+\${JAVA_HOME}+'$JAVA_HOME'+g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh
 
     #
@@ -266,15 +275,15 @@ install_hadoop () {
     echo -e "export HADOOP_HOME=$HADOOP_HOME"                       >> /etc/profile.d/hadoop.sh
     echo -e 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin'  >> /etc/profile.d/hadoop.sh
 
-    # Hadoop user own hadoop installation
-    chown :hadoop -R $HADOOP_HOME
+    # Hadoop group owns hadoop installation
+    chown $ADMIN_USER:hadoop -R $HADOOP_HOME
 
     # Hadoop group can do anything owner can do
     chmod -R g=u $HADOOP_HOME
 
-    # HDFS owns everything on the data disk
+    # HDFS user and hadoop group owns everything on the data disk
     chown hdfs:hadoop -R $MOUNT
-
+    chmod -R g=u $MOUNT
 }
 
 
@@ -313,6 +322,17 @@ setup_node () {
 
         # format HDFS
         sudo -H -u hdfs bash -c "${HADOOP_HOME}/bin/hdfs namenode -format"
+
+        # Create tmp directory
+        sudo -H -u hdfs bash -c 'hdfs dfs -mkdir /tmp'
+
+        # Create user directories
+        for user in "${USERS[@]}";
+        do
+            sudo -H -u hdfs bash -c "hdfs dfs -mkdir /home/$user"
+            sudo -H -u hdfs bash -c "hdfs dfs -chown $user /home/$user"
+            sudo -H -u hdfs bash -c "hdfs dfs -chmod 700 /home/$user"
+        done
 
     elif [[ $ROLE =~ ResourceManager ]];
     then

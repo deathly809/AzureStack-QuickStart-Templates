@@ -37,15 +37,15 @@ start() {
     echo -n $"Starting $desc: "
     case "$ROLE" in
         NameNode)
-            sudo -s hdfs -i ${HADOOP_HOME}/sbin/start-dfs.sh
+            sudo -u hdfs -i ${HADOOP_HOME}/sbin/start-dfs.sh
             RETVAL=$?
         ;;
         ResourceManager)
-            sudo -s yarn -i ${HADOOP_HOME}/sbin/start-yarn.sh
+            sudo -u yarn -i ${HADOOP_HOME}/sbin/start-yarn.sh
             RETVAL=$?
         ;;
         MapReduceJobHistory)
-            sudo -s mapred -i $HADOOP_PREFIX/sbin/mr-jobhistory-daemon.sh start historyserver
+            sudo -u mapred -i ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh start historyserver
             RETVAL=$?
         ;;
     esac
@@ -56,15 +56,15 @@ stop() {
     echo -n $"Stopping $desc: "
     case "$ROLE" in
         NameNode)
-            sudo -s hdfs -i ${HADOOP_HOME}/sbin/stop-dfs.sh
+            sudo -u hdfs -i ${HADOOP_HOME}/sbin/stop-dfs.sh
             RETVAL=$?
         ;;
         ResourceManager)
-            sudo -s  yarn -i ${HADOOP_HOME}/sbin/stop-yarn.sh
+            sudo -u  yarn -i ${HADOOP_HOME}/sbin/stop-yarn.sh
             RETVAL=$?
         ;;
         MapReduceJobHistory)
-            sudo -s mapred -i $HADOOP_PREFIX/sbin/mr-jobhistory-daemon.sh stop historyserver
+            sudo -u mapred -i ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh stop historyserver
             RETVAL=$?
         ;;
     esac
@@ -76,7 +76,7 @@ restart() {
     start
 }
 
-case "$ROLE" in
+case "$1" in
     start)
         start
     ;;

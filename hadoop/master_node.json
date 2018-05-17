@@ -190,9 +190,10 @@
                         "[concat(parameters('baseURI'),'/hadoopSetup.sh')]",
                         "[concat(parameters('baseURI'),'/hadoop.sh')]",
                         "[concat(parameters('baseURI'),'/config/sources.txt')]",
-                        "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
+                        "[concat(parameters('baseURI'),'/config/core-site.xml')]",
                         "[concat(parameters('baseURI'),'/config/hdfs-site.xml')]",
-                        "[concat(parameters('baseURI'),'/config/core-site.xml')]"
+                        "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
+                        "[concat(parameters('baseURI'),'/config/yarn-site.xml')]"
                     ],
                     "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkerNodes'))]"
                 }
