@@ -313,6 +313,21 @@ setup_node () {
         done
     }
 
+    echo -e 'soft notfile 38768' >> /etc/security/limits.conf
+    echo -e 'hard notfile 38768' >> /etc/security/limits.conf
+    echo -e 'soft nproc 38768' >> /etc/security/limits.conf
+    echo -e 'hard nproc 38768' >> /etc/security/limits.conf
+
+echo -e '
+if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+   echo never > /sys/kernel/mm/transparent_hugepage/enabled
+fi
+if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
+   echo never > /sys/kernel/mm/transparent_hugepage/defrag
+fi
+' >> /etc/rc.local
+
+
     if [[ $ROLE =~ Worker ]];
     then
         echo -n "Nothing to do for workers"

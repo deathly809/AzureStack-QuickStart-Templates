@@ -157,7 +157,12 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/jumpboxSetup.sh')]"
+                        "[concat(parameters('baseURI'),'/jumpboxSetup.sh')]",
+                        "[concat(parameters('baseURI'),'/config/sources.txt')]",
+                        "[concat(parameters('baseURI'),'/config/core-site.xml')]",
+                        "[concat(parameters('baseURI'),'/config/hdfs-site.xml')]",
+                        "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
+                        "[concat(parameters('baseURI'),'/config/yarn-site.xml')]"
                     ],
                     "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkerNodes'),' ',parameters('adminUsername'),' ',parameters('adminPassword'))]"
                 }
