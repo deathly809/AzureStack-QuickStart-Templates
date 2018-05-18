@@ -65,7 +65,7 @@
                     {
                         "name": "privateIpConfiguration",
                         "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAllocationMethod": "Static",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },
@@ -164,7 +164,7 @@
                         "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
                         "[concat(parameters('baseURI'),'/config/yarn-site.xml')]"
                     ],
-                    "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkerNodes'),' ',parameters('adminUsername'),' ',parameters('adminPassword'))]"
+                    "commandToExecute": "[concat('bash jumpboxSetup.sh',' ',parameters('numberWorkerNodes'),' ',parameters('adminPassword'))]"
                 }
             }
         }

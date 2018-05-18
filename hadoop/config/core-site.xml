@@ -23,6 +23,6 @@
             A base for other temporary directories.
         </description>
         <name>hadoop.tmp.dir</name>
-        <value>/media/data</value>
+        <value>MOUNT_LOCATION</value>
     </property>
 </configuration>

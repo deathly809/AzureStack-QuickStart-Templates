@@ -19,7 +19,8 @@ trap 'exec 2>&4 1>&3' EXIT SIGHUP SIGINT SIGQUIT
 exec 1>>/mnt/hadoop_extension.log 2>&1
 
 # Output commands and disable history expansion
-set -v +H
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+set -x +H
 
 
 # Reverse DNS fix
@@ -28,9 +29,7 @@ HOST=`hostname`
 echo -n "$IP $HOST" >> /etc/hosts
 
 function Log() {
-    echo
-    echo -e $1
-    echo
+    echo -e "$(date '+%d/%m/%Y %H:%M:%S:%3N'): $1"
 }
 
 ############################################################
@@ -39,32 +38,37 @@ function Log() {
 #
 #
 
-# Error code
-RET_ERR=0
-# What we want to call it locally
-HADOOP_FILE_NAME="hadoop.tar.gz"
+#
+#   System constants
+#
+
+#
+# Regular expressions to extract the ClusterName
+#
+JHREG='\(JobHistory$\)'
+NNREG='\(NameNode$\)'
+RMREG='\(ResourceManager$\)'
+WKREG='\(Worker[0-9]+$\)'
+# Name of the cluster
+CLUSTER_NAME=`hostname | sed "s/$JHREG\|$NNREG\|$RMREG\|$WKREG//g"`
+# Admin USER
+ADMIN_USER=`ls /home/`
 # Where we mount the data disk
-MOUNT="/media/data"
-# Get the role of this node
-ROLE=`hostname`
-# Hadoop Users
+MOUNT=/hadoop
+
+#
+#   Hadoop constants
+#
+
+# What we want to call the hadoop archive locally
+HADOOP_FILE_NAME="hadoop.tar.gz"
+# Hadoop users
 USERS=("hadoop" "hdfs" "mapred" "yarn")
 # Hadoop home
 HADOOP_HOME=/usr/local/hadoop
-# Admin USER
-ADMIN_USER=`ls /home/`
+# Get the role of this node
+ROLE=`hostname`
 
-############################################################
-#
-#	Variables from input
-#
-#
-
-# Name of the cluster
-CLUSTER_NAME="$1"
-
-# Number of worker nodes
-WORKERS="$2"
 
 ############################################################
 #
@@ -73,8 +77,8 @@ WORKERS="$2"
 #
 preinstall () {
     # Java Runtime Environment
-    sudo apt-get update;
-    sudo apt-get install --yes default-jre htop sshpass
+    apt-get update > /dev/null
+    apt-get install --yes default-jre htop sshpass > /dev/null
 
     # Setup JAVA
     JAVA_HOME=`readlink -f /usr/bin/java | sed 's:/bin/java::'`
@@ -119,7 +123,7 @@ attach_disks () {
     n=0
     until [ $n -ge 5 ];
     do
-        sudo parted /dev/$DD mklabel gpt && break
+        parted /dev/$DD mklabel gpt && break
         n=$[$n + 1]
         Log "Label creation failures $n"
         sleep 10
@@ -129,7 +133,7 @@ attach_disks () {
     n=0
     until [ $n -ge 5 ];
     do
-        sudo parted -a opt /dev/$DD mkpart primary ext4 0% 100% && break
+        parted -a opt /dev/$DD mkpart primary ext4 0% 100% && break
         n=$[$n + 1]
         Log "Partition creation failures $n"
         sleep 10
@@ -139,7 +143,7 @@ attach_disks () {
     n=0
     until [ $n -ge 5 ];
     do
-        sudo mkfs.ext4 -L datapartition /dev/${DD}1 -F && break
+        mkfs.ext4 -L datapartition /dev/${DD}1 -F && break
         n=$[$n + 1]
         Log "FS creation failures $n"
         sleep 10
@@ -164,7 +168,7 @@ attach_disks () {
         LINE="UUID=$UUID\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
     fi
 
-    echo "Adding '$LINE' to FSTAB"
+    Log "Adding '$LINE' to FSTAB"
     echo -e "$LINE" >> /etc/fstab
 
     # mount
@@ -178,16 +182,15 @@ attach_disks () {
 #
 
 add_users () {
+
     # Create hadoop user and group
     addgroup "hadoop"
-
-    FILES=$('.profile' '.bashrc')
 
     # Create users and keys
     for user in "${USERS[@]}";
     do
 
-        echo -n "Creating user $user"
+        Log "Creating user $user"
 
         # Create user
         useradd -m -G hadoop -s /bin/bash $user
@@ -201,23 +204,11 @@ add_users () {
         # Key name
         KEY_NAME=$SSH_DIR/id_rsa
 
-        # Remove existing (should not be any)
-        rm -rf $KEY_NAME
-
         # Generate key with empty passphrase
         ssh-keygen -t rsa -N "" -f $KEY_NAME
 
         # Add to my own authorized keys
         cat $SSH_DIR/id_rsa.pub >> $SSH_DIR/authorized_keys
-
-        # Copy missing files
-        for file in ${FILES[@]};
-        do
-            if [ ! -f "/home/$user/$file" ]; then
-                echo "Missing the file $file for user $user"
-                cp "/home/$ADMIN_USER/$file" "/home/$user/$file"
-            fi
-        done
 
         # Disable key checking
         echo -e "Host *" >> /home/$user/.ssh/config
@@ -240,8 +231,8 @@ install_hadoop () {
     while [[ $RET_ERR -ne 0 ]];
     do
         HADOOP_URI=`shuf -n 1 sources.txt`
-        echo -n "Downloading from $HADOOP_URI"
-        timeout 120 wget --timeout 30 "$HADOOP_URI" -O "$HADOOP_FILE_NAME"
+        Log "Downloading from $HADOOP_URI"
+        timeout 120 wget --timeout 30 "$HADOOP_URI" -O "$HADOOP_FILE_NAME" > /dev/null
         RET_ERR=$?
     done
 
@@ -253,20 +244,21 @@ install_hadoop () {
     mkdir -p ${HADOOP_HOME}
     mv hadoop-2.9.0/* ${HADOOP_HOME}
 
-    # Create log directory
+    # Create log directory with permissions
     mkdir ${HADOOP_HOME}/logs
+    chmod 774 ${HADOOP_HOME}/logs
 
     # Copy configuration files
     cp *.xml ${HADOOP_HOME}/etc/hadoop/ -f
 
-    # Setup permissions
-    chmod 664 *.xml
-    chown $ADMIN_USER *.xml
-
     # Update hadoop configuration
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/core-site.xml
+    sed -i -e "s+MOUNT_LOCATION+$MOUNT+g" $HADOOP_HOME/etc/hadoop/core-site.xml
+
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/yarn-site.xml
+
     sed -i -e "s+\${JAVA_HOME}+'$JAVA_HOME'+g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh
 
     #
@@ -279,6 +271,7 @@ install_hadoop () {
     chown $ADMIN_USER:hadoop -R $HADOOP_HOME
 
     # Hadoop group can do anything owner can do
+    chmod 664 $HADOOP_HOME/etc/hadoop/*
     chmod -R g=u $HADOOP_HOME
 
     # HDFS user and hadoop group owns everything on the data disk
@@ -302,8 +295,8 @@ setup_node () {
         chmod 755 /etc/init.d/hadoop.sh
 
         # create symlink
-        sudo ln -s /etc/init.d/hadoop.sh /etc/rc2.d
-        sudo mv /etc/rc2.d/hadoop.sh /etc/rc2.d/S70hadoop.sh
+        ln -s /etc/init.d/hadoop.sh /etc/rc2.d
+        mv /etc/rc2.d/hadoop.sh /etc/rc2.d/S70hadoop.sh
 
         # Create slaves file
         > $HADOOP_HOME/etc/hadoop/slaves
@@ -330,23 +323,25 @@ fi
 
     if [[ $ROLE =~ Worker ]];
     then
-        echo -n "Nothing to do for workers"
+        Log "Nothing to do for workers"
     elif [[ $ROLE =~ NameNode ]];
     then
         setup_master
 
+        HDFS="${HADOOP_HOME}/bin/hdfs"
+
         # format HDFS
-        sudo -H -u hdfs bash -c "${HADOOP_HOME}/bin/hdfs namenode -format"
+        sudo -u hdfs -i "${HDFS} namenode -format"
 
         # Create tmp directory
-        sudo -H -u hdfs bash -c 'hdfs dfs -mkdir /tmp'
+        sudo -u hdfs -i "${HDFS} dfs -mkdir /tmp"
 
         # Create user directories
         for user in "${USERS[@]}";
         do
-            sudo -H -u hdfs bash -c "hdfs dfs -mkdir /home/$user"
-            sudo -H -u hdfs bash -c "hdfs dfs -chown $user /home/$user"
-            sudo -H -u hdfs bash -c "hdfs dfs -chmod 700 /home/$user"
+            sudo -u hdfs -i "${HDFS} dfs -mkdir /home/$user"
+            sudo -u hdfs -i "${HDFS} dfs -chown $user /home/$user"
+            sudo -u hdfs -i "${HDFS} dfs -chmod 700 /home/$user"
         done
 
     elif [[ $ROLE =~ ResourceManager ]];
@@ -356,7 +351,7 @@ fi
     then
         setup_master
     else
-        echo "ERROR"
+        Log "Invalid Role $ROLE"
         exit 999
     fi
 }
@@ -382,6 +377,6 @@ install_hadoop
 # Setup this node for hadoop
 setup_node
 
-echo -e "Success"
+Log "Success"
 
 exit 0

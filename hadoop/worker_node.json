@@ -67,7 +67,7 @@
                     {
                         "name": "workerIpConfig",
                         "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAllocationMethod": "Static",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }
@@ -177,7 +177,7 @@
                         "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
                         "[concat(parameters('baseURI'),'/config/yarn-site.xml')]"
                     ],
-                    "commandToExecute": "[concat('bash ./hadoopSetup.sh',' ',parameters('clusterName'),' ',parameters('numberWorkerNodes'))]"
+                    "commandToExecute": "bash ./hadoopSetup.sh"
                 }
             }
         }
