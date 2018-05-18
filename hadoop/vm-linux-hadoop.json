@@ -276,7 +276,7 @@
                         }
                     },
                     {
-                        "name": "MapReduceJobHistory",
+                        "name": "JobHistory",
                         "properties": {
                             "frontendIPConfiguration": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/', 'loadBalancerFrontEnd')]"

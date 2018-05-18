@@ -74,13 +74,7 @@
         <name>dfs.replication</name>
         <value>1</value>
     </property>
-        <description>
-            Maximal block replication.
-        </description>
-        <name>dfs.replication.max</name>
-        <value>1</value>
-    </property>
-    </property>
+    <property>
         <description>
             Minimal block replication.
         </description>

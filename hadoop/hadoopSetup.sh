@@ -74,7 +74,7 @@ WORKERS="$2"
 preinstall () {
     # Java Runtime Environment
     sudo apt-get update;
-    sudo apt-get install --yes default-jre htop
+    sudo apt-get install --yes default-jre htop sshpass
 
     # Setup JAVA
     JAVA_HOME=`readlink -f /usr/bin/java | sed 's:/bin/java::'`

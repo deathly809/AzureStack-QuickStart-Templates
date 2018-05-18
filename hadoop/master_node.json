@@ -52,7 +52,7 @@
         "masters": [
             "NameNode",
             "ResourceManager",
-            "MapReduceJobHistory"
+            "JobHistory"
         ],
         "numberMasters": "[length(variables('masters'))]"
     },

@@ -23,9 +23,9 @@ then
 elif [[ "$HOST" =~ "ResourceManager" ]];
 then
     ROLE='ResourceManager'
-elif [[ "$HOST" =~ "MapReduceJobHistory" ]];
+elif [[ "$HOST" =~ "JobHistory" ]];
 then
-    ROLE='MapReduceJobHistory'
+    ROLE='JobHistory'
 else
     echo -n "Invalid Role"
     exit 1
@@ -44,7 +44,7 @@ start() {
             sudo -u yarn -i ${HADOOP_HOME}/sbin/start-yarn.sh
             RETVAL=$?
         ;;
-        MapReduceJobHistory)
+        JobHistory)
             sudo -u mapred -i ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh start historyserver
             RETVAL=$?
         ;;
@@ -63,7 +63,7 @@ stop() {
             sudo -u  yarn -i ${HADOOP_HOME}/sbin/stop-yarn.sh
             RETVAL=$?
         ;;
-        MapReduceJobHistory)
+        JobHistory)
             sudo -u mapred -i ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh stop historyserver
             RETVAL=$?
         ;;

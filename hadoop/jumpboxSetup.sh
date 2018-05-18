@@ -15,6 +15,8 @@ exec 1>> /mnt/hadoop_extension.log 2>&1
 # 	Constants
 #
 #
+# Hadoop Home Location
+HADOOP_HOME=/usr/local/hadoop
 # Local hadoop archive
 HADOOP_FILE_NAME="hadoop.tar.gz"
 # Get the role of this node
@@ -51,7 +53,7 @@ ADMIN_PASSWORD="$4"
 #	cluster
 #
 
-NODES=("${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}MapReduceJobHistory")
+NODES=("${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}JobHistory")
 # Add workers
 for i in `seq 0 $((NUMBER_NODES - 1))`;
 do
@@ -76,6 +78,8 @@ preinstall () {
 
 add_hadoop_user () {
     echo -n "Creating user $HADOOP_USER"
+
+    addgroup "hadoop"
 
     # Create user
     useradd -m -G hadoop -s /bin/bash $HADOOP_USER
@@ -127,7 +131,7 @@ copy_users () {
                 echo -e "$FROM -> $TO for $U"
 
                 echo -e "Copy locally"
-                sshpass -p $ADMIN_PASSWORD scp $ADMIN_USER@$FROM:/home/$U/.ssh/id_rsa.pub .
+                sshpass -p $ADMIN_PASSWORD scp -o StrictHostKeyChecking=no $ADMIN_USER@$FROM:/home/$U/.ssh/id_rsa.pub .
 
                 echo -e "Add to remote authorized_keys on host $TO for user $U"
                 cat id_rsa.pub | sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO "sudo tee -a /home/$U/.ssh/authorized_keys"
@@ -182,12 +186,13 @@ install_hadoop () {
     # Create log directory
     mkdir ${HADOOP_HOME}/logs
 
-    # Copy configuration files
-    cp *.xml ${HADOOP_HOME}/etc/hadoop/ -f
-
     # Setup permissions
     chmod 664 *.xml
     chown $ADMIN_USER *.xml
+
+    # Copy configuration files
+    cp *.xml ${HADOOP_HOME}/etc/hadoop/ -f
+
 
     # Update hadoop configuration
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/core-site.xml
