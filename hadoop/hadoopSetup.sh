@@ -48,7 +48,7 @@ MOUNT="/media/data"
 # Get the role of this node
 ROLE=`hostname`
 # Hadoop Users
-USERS=("hdfs" "mapred" "yarn")
+USERS=("hadoop" "hdfs" "mapred" "yarn")
 # Hadoop home
 HADOOP_HOME=/usr/local/hadoop
 # Admin USER
@@ -306,7 +306,7 @@ setup_node () {
         sudo mv /etc/rc2.d/hadoop.sh /etc/rc2.d/S70hadoop.sh
 
         # Create slaves file
-        touch $HADOOP_HOME/etc/hadoop/slaves
+        > $HADOOP_HOME/etc/hadoop/slaves
         for i in `seq 0 $((WORKERS - 1))`;
         do
             echo "${CLUSTER_NAME}Worker${i}" >> $HADOOP_HOME/etc/hadoop/slaves
@@ -318,14 +318,14 @@ setup_node () {
     echo -e 'soft nproc 38768' >> /etc/security/limits.conf
     echo -e 'hard nproc 38768' >> /etc/security/limits.conf
 
-echo -e '
+    echo -e '
 if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
    echo never > /sys/kernel/mm/transparent_hugepage/enabled
 fi
 if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
    echo never > /sys/kernel/mm/transparent_hugepage/defrag
 fi
-' >> /etc/rc.local
+    ' >> /etc/rc.local
 
 
     if [[ $ROLE =~ Worker ]];

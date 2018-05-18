@@ -21,7 +21,8 @@ HADOOP_FILE_NAME="hadoop.tar.gz"
 USERS=("hdfs" "mapred" "yarn")
 # Name of the machine
 HOSTNAME=`hostname`
-
+# Default hadoop user
+HADOOP_USER="hadoop"
 
 # Output commands and disable history expansion
 set -v +H
@@ -73,17 +74,52 @@ preinstall () {
     echo -e "JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')" >> /etc/profile
 }
 
+add_hadoop_user () {
+    echo -n "Creating user $HADOOP_USER"
+
+    # Create user
+    useradd -m -G hadoop -s /bin/bash $HADOOP_USER
+
+    # Location of SSH files
+    SSH_DIR=/home/$HADOOP_USER/.ssh
+
+    # Create directory
+    mkdir -p $SSH_DIR
+
+    # Key name
+    KEY_NAME=$SSH_DIR/id_rsa
+
+    # Remove existing (should not be any)
+    rm -rf $KEY_NAME
+
+    # Generate key with empty passphrase
+    ssh-keygen -t rsa -N "" -f $KEY_NAME
+
+    # Add to my own authorized keys
+    cat $SSH_DIR/id_rsa.pub >> $SSH_DIR/authorized_keys
+
+    # Copy missing files
+    for file in ${FILES[@]};
+    do
+        if [ ! -f "/home/$HADOOP_USER/$file" ]; then
+            echo "Missing the file $file for user $HADOOP_USER"
+            cp "/home/$ADMIN_USER/$file" "/home/$HADOOP_USER/$file"
+        fi
+    done
+
+    # Disable key checking
+    echo -e "Host *" >> /home/$HADOOP_USER/.ssh/config
+    echo -e "    StrictHostKeyChecking no" >> /home/$HADOOP_USER/.ssh/config
+
+    chown -R $HADOOP_USER:$HADOOP_USER /home/$HADOOP_USER
+}
+
 
 ############################################################
 #
 # 	Copy public keys from all nodes to all other nodes.
 #
 copy_users () {
-
-    # Disable key checking
-    echo -e "Host *" >> /home/$user/.ssh/config
-    echo -e "    StrictHostKeyChecking no" >> /home/$user/.ssh/config
-
     for FROM in ${NODES[@]}; do
         for TO in ${NODES[@]}; do
             for U in ${USERS[@]}; do
@@ -175,6 +211,9 @@ install_hadoop () {
 
 # Pre-install all required programs
 preinstall
+
+# Add the hadoop user so we can submit jobs from here
+add_hadoop_user
 
 # Copy public keys around
 copy_users
