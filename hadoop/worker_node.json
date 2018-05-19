@@ -177,7 +177,7 @@
                         "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
                         "[concat(parameters('baseURI'),'/config/yarn-site.xml')]"
                     ],
-                    "commandToExecute": "bash ./hadoopSetup.sh"
+                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'))]"
                 }
             }
         }
