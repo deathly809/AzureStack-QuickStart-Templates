@@ -56,7 +56,7 @@ WORKERS=$1
 JHREG='\(JobHistory$\)'
 NNREG='\(NameNode$\)'
 RMREG='\(ResourceManager$\)'
-WKREG='\(Worker[0-9]+$\)'
+WKREG='\(Worker[0-9]\+$\)'
 # Name of the cluster
 CLUSTER_NAME=`hostname | sed "s/$JHREG\|$NNREG\|$RMREG\|$WKREG//g"`
 # Admin USER
