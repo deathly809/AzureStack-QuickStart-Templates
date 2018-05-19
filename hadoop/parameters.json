@@ -9,7 +9,7 @@
             "value": "localadmin"
         },
         "adminPassword": {
-            "value": "p@ssw0rd"
+            "value": ""
         },
         "storageAccountType": {
             "value": "Standard_LRS"

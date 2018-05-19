@@ -331,17 +331,17 @@ fi
         HDFS="${HADOOP_HOME}/bin/hdfs"
 
         # format HDFS
-        sudo -u hdfs -i "${HDFS} namenode -format"
+        sudo -u hdfs -i ${HDFS} namenode -format
 
         # Create tmp directory
-        sudo -u hdfs -i "${HDFS} dfs -mkdir /tmp"
+        sudo -u hdfs -i ${HDFS} dfs -mkdir /tmp
 
         # Create user directories
         for user in "${USERS[@]}";
         do
-            sudo -u hdfs -i "${HDFS} dfs -mkdir /home/$user"
-            sudo -u hdfs -i "${HDFS} dfs -chown $user /home/$user"
-            sudo -u hdfs -i "${HDFS} dfs -chmod 700 /home/$user"
+            sudo -u hdfs -i ${HDFS} dfs -mkdir /home/$user
+            sudo -u hdfs -i ${HDFS} dfs -chown $user /home/$user
+            sudo -u hdfs -i ${HDFS} dfs -chmod 700 /home/$user
         done
 
     elif [[ $ROLE =~ ResourceManager ]];

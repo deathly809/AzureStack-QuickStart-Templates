@@ -69,6 +69,11 @@ NUMBER_NODES="$1"
 # How many worker nodes
 ADMIN_PASSWORD="$2"
 
+# Check to see if ADMIN_USER has been passed in
+if [ -n ${3+x} ]; then
+    ADMIN_USER="$3"
+fi
+
 ############################################################
 #
 # 	Create the list of master and worker nodes in the
