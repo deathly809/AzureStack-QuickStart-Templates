@@ -70,7 +70,7 @@ NUMBER_NODES="$1"
 ADMIN_PASSWORD="$2"
 
 # Check to see if ADMIN_USER has been passed in
-if [ -n ${3+x} ]; then
+if [ $# -eq 4 ]; then
     ADMIN_USER="$3"
 fi
 
@@ -97,7 +97,7 @@ done
 preinstall () {
     # Install avahi-daemon and Java Runtime Environment
     apt-get update > /dev/null
-    apt-get install --yes default-jre htop sshpass > /dev/null
+    apt-get install --yes --force-yes default-jre htop sshpass > /dev/null
 
     # Setup JAVA
     echo -e "JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')" >> /etc/profile

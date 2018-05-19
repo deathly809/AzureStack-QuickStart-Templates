@@ -78,7 +78,7 @@ ROLE=`hostname`
 preinstall () {
     # Java Runtime Environment
     apt-get update > /dev/null
-    apt-get install --yes default-jre htop sshpass > /dev/null
+    apt-get install --yes --force-yes default-jre htop sshpass > /dev/null
 
     # Setup JAVA
     JAVA_HOME=`readlink -f /usr/bin/java | sed 's:/bin/java::'`
