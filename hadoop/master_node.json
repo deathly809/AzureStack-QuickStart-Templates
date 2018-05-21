@@ -35,6 +35,12 @@
         },
         "baseURI": {
             "type": "string"
+        },
+        "batchSize": {
+            "type": "int",
+            "defaultValue": "10",
+            "min": 1,
+            "max": 40
         }
     },
     "variables": {
@@ -65,7 +71,8 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "masterNics",
-                "count": "[variables('numberMasters')]"
+                "count": "[variables('numberMasters')]",
+                "batchSize": "[parameters('batchSize')]"
             },
             "properties": {
                 "networkSecurityGroup": {
@@ -102,7 +109,8 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "masterNodes",
-                "count": "[variables('numberMasters')]"
+                "count": "[variables('numberMasters')]",
+                "batchSize": "[parameters('batchSize')]"
             },
             "dependsOn": [
                 "masterNics"
@@ -174,7 +182,8 @@
             ],
             "copy": {
                 "name": "masterHadoopSetup",
-                "count": "[variables('numberMasters')]"
+                "count": "[variables('numberMasters')]",
+                "batchSize": "[parameters('batchSize')]"
             },
             "apiVersion": "2015-06-15",
             "tags": {
@@ -189,7 +198,7 @@
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/scripts/hadoopSetup.sh')]",
                         "[concat(parameters('baseURI'),'/scripts/hadoop.sh')]",
-                        "[concat(parameters('baseURI'),'/scripts/template.service.sh')]",
+                        "[concat(parameters('baseURI'),'/scripts/template.service')]",
                         "[concat(parameters('baseURI'),'/config/sources.txt')]",
                         "[concat(parameters('baseURI'),'/config/core-site.xml')]",
                         "[concat(parameters('baseURI'),'/config/hdfs-site.xml')]",

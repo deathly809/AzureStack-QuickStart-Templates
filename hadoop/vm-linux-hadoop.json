@@ -82,6 +82,15 @@
             "metadata": {
                 "description": "Size of the attached data disks in GB."
             }
+        },
+        "batchSize": {
+            "type": "int",
+            "defaultValue": "10",
+            "min": 1,
+            "max": 40,
+            "metadata": {
+                "description": "How many resources to attempt to deploy at once."
+            }
         }
     },
     "variables": {
@@ -340,6 +349,9 @@
                     },
                     "baseURI": {
                         "value": "[variables('baseURI')]"
+                    },
+                    "batchSize": {
+                        "value": "[parameters('batchSize')]"
                     }
                 }
             }
@@ -391,6 +403,9 @@
                     },
                     "baseURI": {
                         "value": "[variables('baseURI')]"
+                    },
+                    "batchSize": {
+                        "value": "[parameters('batchSize')]"
                     }
                 }
             }

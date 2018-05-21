@@ -35,6 +35,12 @@
         },
         "baseURI": {
             "type": "string"
+        },
+        "batchSize": {
+            "type": "int",
+            "defaultValue": "10",
+            "min": 1,
+            "max": 40
         }
     },
     "variables": {
@@ -57,7 +63,8 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "nicLoop",
-                "count": "[parameters('numberWorkerNodes')]"
+                "count": "[parameters('numberWorkerNodes')]",
+                "batchSize": "[parameters('batchSize')]"
             },
             "properties": {
                 "networkSecurityGroup": {
@@ -84,7 +91,8 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "workerNodes",
-                "count": "[parameters('numberWorkerNodes')]"
+                "count": "[parameters('numberWorkerNodes')]",
+                "batchSize": "[parameters('batchSize')]"
             },
             "dependsOn": [
                 "nicLoop"
@@ -156,7 +164,8 @@
             ],
             "copy": {
                 "name": "workerHadoopSetup",
-                "count": "[parameters('numberWorkerNodes')]"
+                "count": "[parameters('numberWorkerNodes')]",
+                "batchSize": "[parameters('batchSize')]"
             },
             "apiVersion": "2015-06-15",
             "tags": {
@@ -171,7 +180,7 @@
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/scripts/hadoopSetup.sh')]",
                         "[concat(parameters('baseURI'),'/scripts/hadoop.sh')]",
-                        "[concat(parameters('baseURI'),'/scripts/template.service.sh')]",
+                        "[concat(parameters('baseURI'),'/scripts/template.service')]",
                         "[concat(parameters('baseURI'),'/config/sources.txt')]",
                         "[concat(parameters('baseURI'),'/config/core-site.xml')]",
                         "[concat(parameters('baseURI'),'/config/hdfs-site.xml')]",
