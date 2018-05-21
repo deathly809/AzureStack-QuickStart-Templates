@@ -140,7 +140,7 @@
             }
         },
         {
-            "name": "[concat(variables('vmName'),'/jumpboxSetup')]",
+            "name": "[concat(variables('vmName'),'/jumpboxCustomScript')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "location": "[resourceGroup().location]",
             "dependsOn": [
@@ -157,7 +157,7 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/jumpboxSetup.sh')]",
+                        "[concat(parameters('baseURI'),'/scripts/jumpboxSetup.sh')]",
                         "[concat(parameters('baseURI'),'/config/sources.txt')]",
                         "[concat(parameters('baseURI'),'/config/core-site.xml')]",
                         "[concat(parameters('baseURI'),'/config/hdfs-site.xml')]",

@@ -28,7 +28,7 @@
             size in bytes (such as 134217728 for 128 MB).
         </description>
         <name>dfs.datanode.balance.bandwidthPerSec</name>
-        <value>10m</value>
+        <value>100m</value>
     </property>
     <property>
         <description>
@@ -145,7 +145,7 @@
             size in bytes (such as 134217728 for 128 MB).
         </description>
         <name>dfs.datanode.balance.bandwidthPerSec</name>
-        <value>10m</value>
+        <value>100m</value>
     </property>
     <property>
         <description>
@@ -161,5 +161,31 @@
         </description>
         <name>dfs.bytes-per-checksum</name>
         <value>512</value>
+    </property>
+    <property>
+        <description>
+            Class representing block placement policy for non-striped files. There are four block placement policies
+            currently being supported:
+
+                BlockPlacementPolicyDefault,
+                BlockPlacementPolicyWithNodeGroup,
+                BlockPlacementPolicyRackFaultTolerant
+                BlockPlacementPolicyWithUpgradeDomain.
+
+            BlockPlacementPolicyDefault chooses the desired number of targets for placing block replicas in a default
+            way.
+
+            BlockPlacementPolicyWithNodeGroup places block replicas on environment with node-group layer.
+
+            BlockPlacementPolicyRackFaultTolerant places the replicas to more racks.
+
+            BlockPlacementPolicyWithUpgradeDomain places block replicas that honors upgrade domain policy.
+
+            The details of placing replicas are documented in the javadoc of the corresponding policy classes. The
+            default policy is BlockPlacementPolicyDefault, and the corresponding class is
+            org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicyDefault.
+        </description>
+        <name>dfs.block.replicator.classname</name>
+        <value>org.apache.hadoop.hdfs.server.blockmanagement.AvailableSpaceBlockPlacementPolicy</value>
     </property>
 </configuration>

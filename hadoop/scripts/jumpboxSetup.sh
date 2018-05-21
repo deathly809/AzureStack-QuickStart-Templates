@@ -80,12 +80,13 @@ fi
 #	cluster
 #
 
-NODES=("${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}JobHistory")
-# Add workers
+MASTER_NODES=("${CLUSTER_NAME}NameNode" "${CLUSTER_NAME}ResourceManager" "${CLUSTER_NAME}JobHistory")
+
+WORKER_NODES=()
 for i in `seq 0 $((NUMBER_NODES - 1))`;
 do
     worker="${CLUSTER_NAME}Worker$i"
-    NODES[$((i + 4))]=$worker
+    WORKER_NODES[$((i + 4))]=$worker
 done
 
 
@@ -100,7 +101,8 @@ preinstall () {
     apt-get install --yes --force-yes default-jre htop sshpass > /dev/null
 
     # Setup JAVA
-    echo -e "JAVA_HOME=$(readlink -f /usr/bin/java | sed 's:/bin/java::')" >> /etc/profile
+    JAVA_HOME=`readlink -f /usr/bin/java | sed 's:/bin/java::'`
+    echo -e "export JAVA_HOME=$JAVA_HOME" >> /etc/profile.d/java.sh
 }
 
 add_hadoop_user () {
@@ -112,13 +114,13 @@ add_hadoop_user () {
     useradd -m -G hadoop -s /bin/bash $HADOOP_USER
 
     # Location of SSH files
-    SSH_DIR=/home/$HADOOP_USER/.ssh
+    local SSH_DIR=/home/$HADOOP_USER/.ssh
 
     # Create directory
     mkdir -p $SSH_DIR
 
     # Key name
-    KEY_NAME=$SSH_DIR/id_rsa
+    local KEY_NAME=$SSH_DIR/id_rsa
 
     # Generate key with empty passphrase
     ssh-keygen -t rsa -N "" -f $KEY_NAME
@@ -140,13 +142,13 @@ add_hadoop_user () {
 # 	Copy public keys from all nodes to all other nodes.
 #
 copy_users () {
-    TMP_FILE='local_authorized_keys'
+    local TMP_FILE='local_authorized_keys'
     # Create empty file
     > $TMP_FILE
 
     # Create local authorized_keys
-    for FROM in ${NODES[@]}; do
-        for U in ${USERS[@]}; do
+    for FROM in ${WORKER_NODES[@]}; do
+        for U in ${WORKER_USERS[@]}; do
             Log "Copy public key from $FROM"
             sshpass -p $ADMIN_PASSWORD scp -o StrictHostKeyChecking=no $ADMIN_USER@$FROM:/home/$U/.ssh/id_rsa.pub .
 
@@ -159,8 +161,8 @@ copy_users () {
     done
 
     # Copy to remove nodes
-    for TO in ${NODES[@]}; do
-        for U in ${USERS[@]}; do
+    for TO in ${MASTER_NODES[@]}; do
+        for U in ${MASTER_USERS[@]}; do
             Log "Add to remote authorized_keys on host $TO for user $U"
             cat $TMP_FILE | sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO "sudo tee -a /home/$U/.ssh/authorized_keys" > /dev/null
         done
@@ -177,8 +179,16 @@ copy_users () {
 #
 restart_nodes () {
     # Add this to task scheduler
-    REBOOT_CMD='echo "sleep 5 && sudo reboot" | at now'
-    for N in ${NODES[@]}; do
+    local REBOOT_CMD='echo "sleep 5 && sudo reboot" | at now'
+
+    # Restart masters
+    for N in ${MASTER_NODES[@]}; do
+        Log "Restarting node $N"
+        sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=10 $ADMIN_USER@$N $REBOOT_CMD > /dev/null
+    done
+
+    # Restart workers
+    for N in ${WORKER_NODES[@]}; do
         Log "Restarting node $N"
         sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=10 $ADMIN_USER@$N $REBOOT_CMD > /dev/null
     done
@@ -194,10 +204,10 @@ restart_nodes () {
 install_hadoop () {
 
     # Download Hadoop from a random source
-    RET_ERR=1
+    local RET_ERR=1
     while [[ $RET_ERR -ne 0 ]];
     do
-        HADOOP_URI=`shuf -n 1 sources.txt`
+        local HADOOP_URI=`shuf -n 1 sources.txt`
         Log "Downloading from $HADOOP_URI"
         timeout 120 wget --timeout 30 "$HADOOP_URI" -O "$HADOOP_FILE_NAME" > /dev/null
         RET_ERR=$?

@@ -166,7 +166,7 @@
             }
         },
         {
-            "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()],'/hadoopSetup')]",
+            "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()],'/masterCustomScript')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "location": "[resourceGroup().location]",
             "dependsOn": [
@@ -187,8 +187,9 @@
                 "autoUpgradeMinorVersion": "true",
                 "settings": {
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/hadoopSetup.sh')]",
-                        "[concat(parameters('baseURI'),'/hadoop.sh')]",
+                        "[concat(parameters('baseURI'),'/scripts/hadoopSetup.sh')]",
+                        "[concat(parameters('baseURI'),'/scripts/hadoop.sh')]",
+                        "[concat(parameters('baseURI'),'/scripts/template.service.sh')]",
                         "[concat(parameters('baseURI'),'/config/sources.txt')]",
                         "[concat(parameters('baseURI'),'/config/core-site.xml')]",
                         "[concat(parameters('baseURI'),'/config/hdfs-site.xml')]",

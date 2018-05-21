@@ -107,20 +107,18 @@ attach_disks () {
 
     Log "Everything under /dev\n$(ls /dev)"
 
-
     # List all disks.
     Log "lsblk: \n$(lsblk)"
 
-
-    DISKS=`lsblk -d | grep "disk" | awk -F ' ' '{print $1}'`
+    local DISKS=`lsblk -d | grep "disk" | awk -F ' ' '{print $1}'`
     Log "DISKS=$DISKS"
 
     # List all partitions.
-    PARTS=`lsblk | grep part`
+    local PARTS=`lsblk | grep part`
     Log "PARTS=$PARTS"
 
     # Get the disk without any partitions.
-    DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
+    local DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
     Log "DD=$DD"
 
     #
@@ -128,7 +126,7 @@ attach_disks () {
     #
 
     Log "Creating label"
-    n=0
+    local n=0
     until [ $n -ge 5 ];
     do
         parted /dev/$DD mklabel gpt && break
@@ -166,7 +164,8 @@ attach_disks () {
 
     # Get the UUID
     blkid -s none
-    UUID=`blkid -s UUID -o value /dev/${DD}1`
+    local UUID=`blkid -s UUID -o value /dev/${DD}1`
+    local LINE=""
 
     if [ -z "$UUID" ]; then
         # Fall back to disk
@@ -204,13 +203,13 @@ add_users () {
         useradd -m -G hadoop -s /bin/bash $user
 
         # Location of SSH files
-        SSH_DIR=/home/$user/.ssh
+        local SSH_DIR=/home/$user/.ssh
 
         # Create directory
         mkdir -p $SSH_DIR
 
         # Key name
-        KEY_NAME=$SSH_DIR/id_rsa
+        local KEY_NAME=$SSH_DIR/id_rsa
 
         # Generate key with empty passphrase
         ssh-keygen -t rsa -N "" -f $KEY_NAME
@@ -235,10 +234,10 @@ add_users () {
 install_hadoop () {
 
     # Download Hadoop from a random source
-    RET_ERR=1
+    local RET_ERR=1
     while [[ $RET_ERR -ne 0 ]];
     do
-        HADOOP_URI=`shuf -n 1 sources.txt`
+        local HADOOP_URI=`shuf -n 1 sources.txt`
         Log "Downloading from $HADOOP_URI"
         timeout 120 wget --timeout 30 "$HADOOP_URI" -O "$HADOOP_FILE_NAME" > /dev/null
         RET_ERR=$?
@@ -255,6 +254,10 @@ install_hadoop () {
     # Create log directory with permissions
     mkdir ${HADOOP_HOME}/logs
     chmod 774 ${HADOOP_HOME}/logs
+
+    # Create azure directory with permissions
+    mkdir ${HADOOP_HOME}/azure
+    chmod 774 ${HADOOP_HOME}/azure
 
     # Copy configuration files
     cp *.xml ${HADOOP_HOME}/etc/hadoop/ -f
@@ -296,22 +299,69 @@ install_hadoop () {
 
 setup_node () {
 
+    # Create a service and restart it
+    function create_service() {
+
+        local NAME=$1
+        local USER=$2
+
+        local FILENAME="$NAME.service"
+        local START=$HADOOP_HOME/azure/start-$NAME.sh
+        local STOP=$HADOOP_HOME/azure/stop-$NAME.sh
+        local PID="/tmp/hadoop-$USER-$NAME.pid"
+
+        # Create
+        cp template.service $FILENAME
+
+        # Update
+        sed -i -e "s/SED_USER/$USER/g" $FILENAME
+        sed -i -e "s/SED_START/$START/g" $FILENAME
+        sed -i -e "s/SED_STOP/$STOP/g" $FILENAME
+        sed -i -e "s/SED_JAVA_HOME/$JAVA_HOME/g" $FILENAME
+        sed -i -e "s/SED_PID/$PID/g" $FILENAME
+        sed -i -e "s/SED_HADOOP_HOME/$HADOOP_HOME/g" $FILENAME
+
+        # Install
+        mv $FILENAME /etc/systemd/system/
+
+        # Load new systemd configuration
+        systemctl daemon-reload
+    }
+
     setup_master() {
-
-        # Copy startup script to init.d
-        cp ${PWD}/hadoop.sh /etc/init.d/hadoop.sh
-        chmod 755 /etc/init.d/hadoop.sh
-
-        # create symlink
-        ln -s /etc/init.d/hadoop.sh /etc/rc2.d
-        mv /etc/rc2.d/hadoop.sh /etc/rc2.d/S70hadoop.sh
-
         # Create slaves file
         > $HADOOP_HOME/etc/hadoop/slaves
         for i in `seq 0 $((WORKERS - 1))`;
         do
             echo "${CLUSTER_NAME}Worker${i}" >> $HADOOP_HOME/etc/hadoop/slaves
         done
+    }
+
+    # Create directories and persmissions
+    setup_namenode() {
+
+        local HDFS="${HADOOP_HOME}/bin/hdfs"
+
+        # Start HDFS Namenode
+        $HADOOP_HOME/sbin/hadoop-daemon.sh --script hdfs start namenode
+
+        # format HDFS
+        sudo -u hdfs -i ${HDFS} namenode -format
+
+        # Create tmp directory
+        sudo -u hdfs -i ${HDFS} dfs -mkdir /tmp
+
+        # Create user directories
+        for user in "${USERS[@]}";
+        do
+            sudo -u hdfs -i ${HDFS} dfs -mkdir /home/$user
+            sudo -u hdfs -i ${HDFS} dfs -chown $user /home/$user
+            sudo -u hdfs -i ${HDFS} dfs -chmod 700 /home/$user
+        done
+
+        # Stop HDFS Namenode
+        $HADOOP_HOME/sbin/hadoop-daemon.sh --script hdfs stop namenode
+
     }
 
     echo -e 'soft notfile 38768' >> /etc/security/limits.conf
@@ -331,33 +381,42 @@ fi
 
     if [[ $ROLE =~ Worker ]];
     then
-        Log "Nothing to do for workers"
+
+        # Resource Node
+        echo "/usr/local/hadoop/sbin/yarn-daemon.sh start nodemanager" > $HADOOP_HOME/azure/start-nodemanager.sh
+        echo "/usr/local/hadoop/sbin/yarn-daemon.sh stop nodemanager" > $HADOOP_HOME/azure/stop-nodemanager.sh
+        create_service 'nodemanager' 'yarn'
+
+        # Data Node
+        echo "/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start datanode" > $HADOOP_HOME/azure/start-datanode.sh
+        echo "/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop datanode" > $HADOOP_HOME/azure/stop-datanode.sh
+        create_service 'datanode' 'hdfs'
+
     elif [[ $ROLE =~ NameNode ]];
     then
         setup_master
+        setup_namenode
 
-        HDFS="${HADOOP_HOME}/bin/hdfs"
-
-        # format HDFS
-        sudo -u hdfs -i ${HDFS} namenode -format
-
-        # Create tmp directory
-        sudo -u hdfs -i ${HDFS} dfs -mkdir /tmp
-
-        # Create user directories
-        for user in "${USERS[@]}";
-        do
-            sudo -u hdfs -i ${HDFS} dfs -mkdir /home/$user
-            sudo -u hdfs -i ${HDFS} dfs -chown $user /home/$user
-            sudo -u hdfs -i ${HDFS} dfs -chmod 700 /home/$user
-        done
+        echo "/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start namenode" > $HADOOP_HOME/azure/start-namenode.sh
+        echo "/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop namenode" > $HADOOP_HOME/azure/stop-namenode.sh
+        create_service 'namenode' 'hdfs'
 
     elif [[ $ROLE =~ ResourceManager ]];
     then
         setup_master
+
+        echo "/usr/local/hadoop/sbin/yarn-daemon.sh start resourcemanager" > $HADOOP_HOME/azure/start-resourcemanager.sh
+        echo "/usr/local/hadoop/sbin/yarn-daemon.sh stop resourcemanager" > $HADOOP_HOME/azure/stop-resourcemanager.sh
+        create_service 'resourcemanager' 'yarn'
+
     elif [[ $ROLE =~ JobHistory ]];
     then
         setup_master
+
+        echo "/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh start historyserver" > $HADOOP_HOME/azure/start-historyserver.sh
+        echo "/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh stop historyserver" > $HADOOP_HOME/azure/stop-historyserver.sh
+        create_service 'historyserver' 'mapred'
+
     else
         Log "Invalid Role $ROLE"
         exit 999
