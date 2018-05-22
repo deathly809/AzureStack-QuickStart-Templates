@@ -354,9 +354,11 @@ setup_node () {
 
         # Create tmp directory
         sudo -u hdfs -i ${HDFS} dfs -mkdir /tmp
+        sudo -u hdfs -i ${HDFS} dfs -chmod 777 /tmp
 
         # Create home directory
         sudo -u hdfs -i ${HDFS} dfs -mkdir /home
+        sudo -u hdfs -i ${HDFS} dfs -chmod 775 /tmp
 
         # Create user directories
         for user in "${USERS[@]}";
