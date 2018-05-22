@@ -51,7 +51,8 @@
         "nicName": "[concat(variables('defaultName'),'nic')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
+        "sizeOfBatch": "[min(parameters('batchSize'),parameters('numberWorkerNodes'))]"
     },
     "resources": [
         {
@@ -91,7 +92,7 @@
                 "name": "workerNodes",
                 "mode": "Serial",
                 "count": "[parameters('numberWorkerNodes')]",
-                "batchSize": "[min(parameters('numberWorkerNodes'),parameters('batchSize'))]"
+                "batchSize": "[variables('sizeOfBatch')]"
             },
             "dependsOn": [
                 "nicLoop"
