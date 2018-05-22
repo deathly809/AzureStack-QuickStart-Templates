@@ -32,6 +32,14 @@ function Log() {
     echo -e "$(date '+%d/%m/%Y %H:%M:%S:%3N'): $1"
 }
 
+function check_error() {
+    RET=$1
+    MSG=$MSG
+    if [ $RET -ne 0 ]; then
+        Log "[ERROR] $MSG"
+        exit 1
+    fi
+}
 
 ############################################################
 #
@@ -87,10 +95,12 @@ preinstall () {
     # Java Runtime Environment
     apt-get update > /dev/null
     DEBIAN_FRONTEND=noninteractive apt-get install --yes --quiet default-jre htop sshpass > /dev/null
+    check_error $? "Could not install pre-reqs"
 
     # Setup JAVA
     JAVA_HOME=`readlink -f /usr/bin/java | sed 's:/bin/java::'`
     echo -e "export JAVA_HOME=$JAVA_HOME" >> /etc/profile.d/java.sh
+    check_error $? "Could not add JAVA_HOME to profile"
 }
 
 ############################################################
@@ -180,6 +190,7 @@ attach_disks () {
 
     # mount
     mount $MOUNT
+    check_error $? "Could not mount $DD to $MOUNT"
 }
 
 ############################################################
@@ -201,6 +212,7 @@ add_users () {
 
         # Create user
         useradd -m -g hadoop -s /bin/bash $user
+        check_error $? "Could not create user $user"
 
         # Location of SSH files
         local SSH_DIR=/home/$user/.ssh
@@ -213,6 +225,7 @@ add_users () {
 
         # Generate key with empty passphrase
         ssh-keygen -t rsa -N "" -f $KEY_NAME
+        check_error $? "Could not generate key for $user"
 
         # Add to my own authorized keys
         cat $SSH_DIR/id_rsa.pub >> $SSH_DIR/authorized_keys
@@ -245,11 +258,12 @@ install_hadoop () {
 
     # Extract
     tar -xvzf $HADOOP_FILE_NAME > /dev/null
-    rm $HADOOP_FILE_NAME
+    check_error $? "Could not extract Hadoop"
 
     # Move files to /usr/local
     mkdir -p ${HADOOP_HOME}
     mv hadoop-2.9.0/* ${HADOOP_HOME}
+    check_error $? "Could not move files to $HADOOP_HOME"
 
     # Create log directory with permissions
     mkdir ${HADOOP_HOME}/logs
@@ -348,24 +362,36 @@ setup_node () {
 
         # format HDFS
         sudo -u hdfs -i ${HDFS} namenode -format
+        check_error $? "Could not format NameNode"
 
         # Start HDFS Namenode
         $HADOOP_HOME/sbin/hadoop-daemon.sh --script hdfs start namenode
+        check_error $? "Could not start NameNode"
 
         # Create tmp directory
         sudo -u hdfs -i ${HDFS} dfs -mkdir /tmp
+        check_error $? "Could not create the HDFS directory /tmp"
+
         sudo -u hdfs -i ${HDFS} dfs -chmod 777 /tmp
+        check_error $? "Could not chmod the HDFS directory /tmp"
 
         # Create home directory
         sudo -u hdfs -i ${HDFS} dfs -mkdir /home
-        sudo -u hdfs -i ${HDFS} dfs -chmod 775 /tmp
+        check_error $? "Could not create the HDFS directory /home"
+        sudo -u hdfs -i ${HDFS} dfs -chmod 775 /home
+        check_error $? "Could not chmod the HDFS directory /home"
 
         # Create user directories
         for user in "${USERS[@]}";
         do
             sudo -u hdfs -i ${HDFS} dfs -mkdir /home/$user
+            check_error $? "Could not create the HDFS directory /home/$user"
+
             sudo -u hdfs -i ${HDFS} dfs -chown $user /home/$user
+            check_error $? "Could not change the HDFS directory /home/$user owner"
+
             sudo -u hdfs -i ${HDFS} dfs -chmod 700 /home/$user
+            check_error $? "Could not chmod the HDFS directory /home/$user"
         done
 
         # Stop HDFS Namenode
@@ -432,7 +458,7 @@ fi
     fi
 
     chown $ADMIN_USER:hadoop $HADOOP_HOME/azure -R
-    chmod 544 $HADOOP_HOME/azure/*.sh
+    chmod 555 $HADOOP_HOME/azure/*.sh
 }
 
 ############################################################
@@ -442,19 +468,39 @@ fi
 #
 
 # Pre-install all required programs
-preinstall
+if [ ! -f pre_status ];
+then
+    preinstall
+    echo 'DONE' >> pre_status
+fi
 
 # Attach all data disks
-attach_disks
+if [ ! -f disk_status ];
+then
+    attach_disks
+    echo 'DONE' >> disk_status
+fi
 
 # Add all Hadoop users
-add_users
+if [ ! -f user_status ];
+then
+    add_users
+    echo 'DONE' >> user_status
+fi
 
 # Install hadoop
-install_hadoop
+if [ ! -f hadoop_status ];
+then
+    install_hadoop
+    echo 'DONE' >> hadoop_status
+fi
 
 # Setup this node for hadoop
-setup_node
+if [ ! -f setup_status ];
+then
+    setup_node
+    echo 'DONE' >> setup_status
+fi
 
 Log "Success"
 
