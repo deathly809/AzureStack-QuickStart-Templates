@@ -38,7 +38,7 @@
         },
         "batchSize": {
             "type": "int",
-            "defaultValue": "10",
+            "defaultValue": 10,
             "minValue": 1,
             "maxValue": 40
         }
