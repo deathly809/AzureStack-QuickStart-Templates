@@ -10,8 +10,8 @@ Group=hadoop
 Type=forking
 
 # Script location
-ExecStart=SED_HADOOP_HOME/azure/SED_START_FILE
-ExecStop=SED_HADOOP_HOME/azure/SED_STOP_FILE
+ExecStart=SED_START
+ExecStop=SED_STOP
 WorkingDirectory=SED_HADOOP_HOME
 
 # Environment Variables

@@ -200,7 +200,7 @@ add_users () {
         Log "Creating user $user"
 
         # Create user
-        useradd -m -G hadoop -s /bin/bash $user
+        useradd -m -g hadoop -s /bin/bash $user
 
         # Location of SSH files
         local SSH_DIR=/home/$user/.ssh
@@ -323,9 +323,11 @@ setup_node () {
 
         # Install
         mv $FILENAME /etc/systemd/system/
+        chmod 755  /etc/systemd/system/$FILENAME
 
         # Load new systemd configuration
         systemctl daemon-reload
+        systemctl enable $FILENAME
     }
 
     setup_master() {
@@ -350,6 +352,9 @@ setup_node () {
 
         # Create tmp directory
         sudo -u hdfs -i ${HDFS} dfs -mkdir /tmp
+
+        # Create home directory
+        sudo -u hdfs -i ${HDFS} dfs -mkdir /home
 
         # Create user directories
         for user in "${USERS[@]}";
@@ -383,13 +388,13 @@ fi
     then
 
         # Resource Node
-        echo "/usr/local/hadoop/sbin/yarn-daemon.sh start nodemanager" > $HADOOP_HOME/azure/start-nodemanager.sh
-        echo "/usr/local/hadoop/sbin/yarn-daemon.sh stop nodemanager" > $HADOOP_HOME/azure/stop-nodemanager.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh start nodemanager" > $HADOOP_HOME/azure/start-nodemanager.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh stop nodemanager" > $HADOOP_HOME/azure/stop-nodemanager.sh
         create_service 'nodemanager' 'yarn'
 
         # Data Node
-        echo "/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start datanode" > $HADOOP_HOME/azure/start-datanode.sh
-        echo "/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop datanode" > $HADOOP_HOME/azure/stop-datanode.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start datanode" > $HADOOP_HOME/azure/start-datanode.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop datanode" > $HADOOP_HOME/azure/stop-datanode.sh
         create_service 'datanode' 'hdfs'
 
     elif [[ $ROLE =~ NameNode ]];
@@ -397,30 +402,33 @@ fi
         setup_master
         setup_namenode
 
-        echo "/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start namenode" > $HADOOP_HOME/azure/start-namenode.sh
-        echo "/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop namenode" > $HADOOP_HOME/azure/stop-namenode.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start namenode" > $HADOOP_HOME/azure/start-namenode.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop namenode" > $HADOOP_HOME/azure/stop-namenode.sh
         create_service 'namenode' 'hdfs'
 
     elif [[ $ROLE =~ ResourceManager ]];
     then
         setup_master
 
-        echo "/usr/local/hadoop/sbin/yarn-daemon.sh start resourcemanager" > $HADOOP_HOME/azure/start-resourcemanager.sh
-        echo "/usr/local/hadoop/sbin/yarn-daemon.sh stop resourcemanager" > $HADOOP_HOME/azure/stop-resourcemanager.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh start resourcemanager" > $HADOOP_HOME/azure/start-resourcemanager.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh stop resourcemanager" > $HADOOP_HOME/azure/stop-resourcemanager.sh
         create_service 'resourcemanager' 'yarn'
 
     elif [[ $ROLE =~ JobHistory ]];
     then
         setup_master
 
-        echo "/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh start historyserver" > $HADOOP_HOME/azure/start-historyserver.sh
-        echo "/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh stop historyserver" > $HADOOP_HOME/azure/stop-historyserver.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh start historyserver" > $HADOOP_HOME/azure/start-historyserver.sh
+        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh stop historyserver" > $HADOOP_HOME/azure/stop-historyserver.sh
         create_service 'historyserver' 'mapred'
 
     else
         Log "Invalid Role $ROLE"
         exit 999
     fi
+
+    chown $ADMIN_USER:hadoop $HADOOP_HOME/azure -R
+    chmod 644 $HADOOP_HOME/azure/*.sh
 }
 
 ############################################################

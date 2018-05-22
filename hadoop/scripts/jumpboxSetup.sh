@@ -111,7 +111,7 @@ add_hadoop_user () {
     addgroup "hadoop"
 
     # Create user
-    useradd -m -G hadoop -s /bin/bash $HADOOP_USER
+    useradd -m -g hadoop -s /bin/bash $HADOOP_USER
 
     # Location of SSH files
     local SSH_DIR=/home/$HADOOP_USER/.ssh
@@ -148,7 +148,7 @@ copy_users () {
 
     # Create local authorized_keys
     for FROM in ${WORKER_NODES[@]}; do
-        for U in ${WORKER_USERS[@]}; do
+        for U in ${USERS[@]}; do
             Log "Copy public key from $FROM"
             sshpass -p $ADMIN_PASSWORD scp -o StrictHostKeyChecking=no $ADMIN_USER@$FROM:/home/$U/.ssh/id_rsa.pub .
 
@@ -162,7 +162,7 @@ copy_users () {
 
     # Copy to remove nodes
     for TO in ${MASTER_NODES[@]}; do
-        for U in ${MASTER_USERS[@]}; do
+        for U in ${USERS[@]}; do
             Log "Add to remote authorized_keys on host $TO for user $U"
             cat $TMP_FILE | sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USER@$TO "sudo tee -a /home/$U/.ssh/authorized_keys" > /dev/null
         done
