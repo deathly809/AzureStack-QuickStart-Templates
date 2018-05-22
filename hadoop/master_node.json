@@ -105,6 +105,7 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "masterNodes",
+                "mode": "Serial",
                 "count": "[variables('numberMasters')]",
                 "batchSize": "[parameters('batchSize')]"
             },

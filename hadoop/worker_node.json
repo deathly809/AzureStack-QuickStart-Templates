@@ -87,6 +87,7 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "workerNodes",
+                "mode": "Serial",
                 "count": "[parameters('numberWorkerNodes')]",
                 "batchSize": "[parameters('batchSize')]"
             },
