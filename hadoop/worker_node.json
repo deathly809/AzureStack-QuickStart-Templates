@@ -52,7 +52,7 @@
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
         "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
-        "sizeOfBatch": "[min(parameters('batchSize'),parameters('numberWorkerNodes'))]"
+        "sizeOfBatch": "[max(1,min(parameters('batchSize'),parameters('numberWorkerNodes')))]"
     },
     "resources": [
         {
