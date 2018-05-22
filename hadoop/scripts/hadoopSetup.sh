@@ -325,9 +325,10 @@ setup_node () {
         mv $FILENAME /etc/systemd/system/
         chmod 755  /etc/systemd/system/$FILENAME
 
-        # Load new systemd configuration
+        # Load, enable, and start service
         systemctl daemon-reload
         systemctl enable $FILENAME
+        systemctl start $FILENAME
     }
 
     setup_master() {
