@@ -179,7 +179,6 @@
                 "settings": {
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/scripts/hadoopSetup.sh')]",
-                        "[concat(parameters('baseURI'),'/scripts/hadoop.sh')]",
                         "[concat(parameters('baseURI'),'/scripts/template.service')]",
                         "[concat(parameters('baseURI'),'/config/sources.txt')]",
                         "[concat(parameters('baseURI'),'/config/core-site.xml')]",
