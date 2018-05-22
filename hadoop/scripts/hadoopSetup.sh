@@ -388,13 +388,13 @@ fi
     then
 
         # Resource Node
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh start nodemanager" > $HADOOP_HOME/azure/start-nodemanager.sh
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh stop nodemanager" > $HADOOP_HOME/azure/stop-nodemanager.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh start nodemanager" > $HADOOP_HOME/azure/start-nodemanager.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh stop nodemanager" > $HADOOP_HOME/azure/stop-nodemanager.sh
         create_service 'nodemanager' 'yarn'
 
         # Data Node
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start datanode" > $HADOOP_HOME/azure/start-datanode.sh
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop datanode" > $HADOOP_HOME/azure/stop-datanode.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start datanode" > $HADOOP_HOME/azure/start-datanode.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop datanode" > $HADOOP_HOME/azure/stop-datanode.sh
         create_service 'datanode' 'hdfs'
 
     elif [[ $ROLE =~ NameNode ]];
@@ -402,24 +402,24 @@ fi
         setup_master
         setup_namenode
 
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start namenode" > $HADOOP_HOME/azure/start-namenode.sh
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop namenode" > $HADOOP_HOME/azure/stop-namenode.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs start namenode" > $HADOOP_HOME/azure/start-namenode.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/hadoop-daemon.sh --script hdfs stop namenode" > $HADOOP_HOME/azure/stop-namenode.sh
         create_service 'namenode' 'hdfs'
 
     elif [[ $ROLE =~ ResourceManager ]];
     then
         setup_master
 
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh start resourcemanager" > $HADOOP_HOME/azure/start-resourcemanager.sh
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh stop resourcemanager" > $HADOOP_HOME/azure/stop-resourcemanager.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh start resourcemanager" > $HADOOP_HOME/azure/start-resourcemanager.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/yarn-daemon.sh stop resourcemanager" > $HADOOP_HOME/azure/stop-resourcemanager.sh
         create_service 'resourcemanager' 'yarn'
 
     elif [[ $ROLE =~ JobHistory ]];
     then
         setup_master
 
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh start historyserver" > $HADOOP_HOME/azure/start-historyserver.sh
-        echo -e "!#/bin/bash\n/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh stop historyserver" > $HADOOP_HOME/azure/stop-historyserver.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh start historyserver" > $HADOOP_HOME/azure/start-historyserver.sh
+        echo -e "#!/bin/bash\n/usr/local/hadoop/sbin/mr-jobhistory-daemon.sh stop historyserver" > $HADOOP_HOME/azure/stop-historyserver.sh
         create_service 'historyserver' 'mapred'
 
     else
