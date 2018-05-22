@@ -60,8 +60,7 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "nicLoop",
-                "count": "[parameters('numberWorkerNodes')]",
-                "batchSize": "[parameters('batchSize')]"
+                "count": "[parameters('numberWorkerNodes')]"
             },
             "properties": {
                 "networkSecurityGroup": {
@@ -161,8 +160,7 @@
             ],
             "copy": {
                 "name": "workerHadoopSetup",
-                "count": "[parameters('numberWorkerNodes')]",
-                "batchSize": "[parameters('batchSize')]"
+                "count": "[parameters('numberWorkerNodes')]"
             },
             "apiVersion": "2015-06-15",
             "tags": {

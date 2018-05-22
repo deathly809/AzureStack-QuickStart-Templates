@@ -68,8 +68,7 @@
             "location": "[variables('location')]",
             "copy": {
                 "name": "masterNics",
-                "count": "[variables('numberMasters')]",
-                "batchSize": "[parameters('batchSize')]"
+                "count": "[variables('numberMasters')]"
             },
             "properties": {
                 "networkSecurityGroup": {
@@ -179,8 +178,7 @@
             ],
             "copy": {
                 "name": "masterHadoopSetup",
-                "count": "[variables('numberMasters')]",
-                "batchSize": "[parameters('batchSize')]"
+                "count": "[variables('numberMasters')]"
             },
             "apiVersion": "2015-06-15",
             "tags": {
