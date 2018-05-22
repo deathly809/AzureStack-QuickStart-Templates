@@ -86,7 +86,7 @@ ROLE=`hostname`
 preinstall () {
     # Java Runtime Environment
     apt-get update > /dev/null
-    apt-get install --yes --force-yes default-jre htop sshpass > /dev/null
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes --quiet default-jre htop sshpass > /dev/null
 
     # Setup JAVA
     JAVA_HOME=`readlink -f /usr/bin/java | sed 's:/bin/java::'`
@@ -314,12 +314,12 @@ setup_node () {
         cp template.service $FILENAME
 
         # Update
-        sed -i -e "s/SED_USER/$USER/g" $FILENAME
-        sed -i -e "s/SED_START/$START/g" $FILENAME
-        sed -i -e "s/SED_STOP/$STOP/g" $FILENAME
-        sed -i -e "s/SED_JAVA_HOME/$JAVA_HOME/g" $FILENAME
-        sed -i -e "s/SED_PID/$PID/g" $FILENAME
-        sed -i -e "s/SED_HADOOP_HOME/$HADOOP_HOME/g" $FILENAME
+        sed -i -e "s+SED_USER+$USER+g" $FILENAME
+        sed -i -e "s+SED_START+$START+g" $FILENAME
+        sed -i -e "s+SED_STOP+$STOP+g" $FILENAME
+        sed -i -e "s+SED_JAVA_HOME+$JAVA_HOME+g" $FILENAME
+        sed -i -e "s+SED_PID+$PID+g" $FILENAME
+        sed -i -e "s+SED_HADOOP_HOME+$HADOOP_HOME+g" $FILENAME
 
         # Install
         mv $FILENAME /etc/systemd/system/
@@ -342,11 +342,11 @@ setup_node () {
 
         local HDFS="${HADOOP_HOME}/bin/hdfs"
 
-        # Start HDFS Namenode
-        $HADOOP_HOME/sbin/hadoop-daemon.sh --script hdfs start namenode
-
         # format HDFS
         sudo -u hdfs -i ${HDFS} namenode -format
+
+        # Start HDFS Namenode
+        $HADOOP_HOME/sbin/hadoop-daemon.sh --script hdfs start namenode
 
         # Create tmp directory
         sudo -u hdfs -i ${HDFS} dfs -mkdir /tmp

@@ -98,7 +98,7 @@ done
 preinstall () {
     # Install avahi-daemon and Java Runtime Environment
     apt-get update > /dev/null
-    apt-get install --yes --force-yes default-jre htop sshpass > /dev/null
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes --quiet default-jre htop sshpass > /dev/null
 
     # Setup JAVA
     JAVA_HOME=`readlink -f /usr/bin/java | sed 's:/bin/java::'`
@@ -267,9 +267,6 @@ restart_nodes
 
 # install hadoop.
 install_hadoop
-
-# TODO: Install GUI after you figure out RDP.
-# echo 'sudo apt-get install --yes lubuntu-desktop && sudo reboot' | at now
 
 Log "Success"
 exit 0
