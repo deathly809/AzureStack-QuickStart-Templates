@@ -365,7 +365,7 @@ setup_node () {
         check_error $? "Could not format NameNode"
 
         # Start HDFS Namenode
-        $HADOOP_HOME/sbin/hadoop-daemon.sh --script hdfs start namenode
+        sudo -u hdfs -i $HADOOP_HOME/sbin/hadoop-daemon.sh --script hdfs start namenode
         check_error $? "Could not start NameNode"
 
         # Create tmp directory
@@ -378,6 +378,7 @@ setup_node () {
         # Create home directory
         sudo -u hdfs -i ${HDFS} dfs -mkdir /home
         check_error $? "Could not create the HDFS directory /home"
+
         sudo -u hdfs -i ${HDFS} dfs -chmod 775 /home
         check_error $? "Could not chmod the HDFS directory /home"
 
@@ -395,7 +396,7 @@ setup_node () {
         done
 
         # Stop HDFS Namenode
-        $HADOOP_HOME/sbin/hadoop-daemon.sh --script hdfs stop namenode
+        sudo -u hdfs -i $HADOOP_HOME/sbin/hadoop-daemon.sh --script hdfs stop namenode
 
     }
 
