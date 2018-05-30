@@ -129,5 +129,6 @@
         </description>
         <name>mapreduce.client.submit.file.replication</name>
         <value>1</value>
+        <final>true</final>
     </property>
 </configuration>

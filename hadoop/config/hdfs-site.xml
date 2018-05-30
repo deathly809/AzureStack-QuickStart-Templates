@@ -73,6 +73,7 @@
         </description>
         <name>dfs.replication</name>
         <value>1</value>
+        <final>true</final>
     </property>
     <property>
         <description>
@@ -80,6 +81,7 @@
         </description>
         <name>dfs.replication.min</name>
         <value>1</value>
+        <final>true</final>
     </property>
     <property>
         <description>
@@ -87,6 +89,7 @@
         </description>
         <name>dfs.replication.max</name>
         <value>1</value>
+        <final>true</final>
     </property>
     <property>
         <description>

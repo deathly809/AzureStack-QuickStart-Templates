@@ -400,8 +400,8 @@ setup_node () {
 
     }
 
-    echo -e 'soft notfile 38768' >> /etc/security/limits.conf
-    echo -e 'hard notfile 38768' >> /etc/security/limits.conf
+    echo -e 'soft nofile 38768' >> /etc/security/limits.conf
+    echo -e 'hard nofile 38768' >> /etc/security/limits.conf
     echo -e 'soft nproc 38768' >> /etc/security/limits.conf
     echo -e 'hard nproc 38768' >> /etc/security/limits.conf
 
