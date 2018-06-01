@@ -40,10 +40,24 @@
             "type": "string",
             "defaultValue": "Standard_D3_v2",
             "allowedValues": [
-                "Standard_D2_v2",
                 "Standard_D3_v2",
                 "Standard_D4_v2",
-                "Standard_D5_v2"
+                "Standard_D5_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_D12",
+                "Standard_D13",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2"
             ],
             "metadata": {
                 "description": "The size of the virtual machine master nodes."
@@ -53,13 +67,21 @@
             "type": "string",
             "defaultValue": "Standard_DS4_v2",
             "allowedValues": [
-                "Standard_DS3_v2",
                 "Standard_DS4_v2",
                 "Standard_DS5_v2",
                 "Standard_DS11_v2",
                 "Standard_DS12_v2",
                 "Standard_DS13_v2",
-                "Standard_DS14_v2"
+                "Standard_DS14_v2",
+                "Standard_F8s_v2",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_F16s",
+                "Standard_F8s",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2"
             ],
             "metadata": {
                 "description": "The size of the Virtual Machine worker nodes."
