@@ -84,7 +84,7 @@
         },
         {
             "comments": "Worker nodes.",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2016-03-30",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(variables('defaultName'),'Worker',copyIndex())]",
             "location": "[variables('location')]",
@@ -166,7 +166,7 @@
                 "name": "workerHadoopSetup",
                 "count": "[parameters('numberWorkerNodes')]"
             },
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2016-03-30",
             "tags": {
                 "displayName": "hadoopSetup"
             },

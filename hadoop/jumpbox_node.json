@@ -86,7 +86,7 @@
         },
         {
             "comments": "Jump box node.",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2016-03-30",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[variables('vmName')]",
             "location": "[variables('location')]",
@@ -142,11 +142,11 @@
         {
             "name": "[concat(variables('vmName'),'/jumpboxCustomScript')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2016-03-30",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId(resourceGroup().name, 'Microsoft.Compute/virtualMachines',variables('vmName'))]"
             ],
-            "apiVersion": "2015-06-15",
             "tags": {
                 "displayName": "jumpboxSetup"
             },
