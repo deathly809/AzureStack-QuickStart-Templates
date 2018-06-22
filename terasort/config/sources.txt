@@ -1,0 +1,2 @@
+http://www-us.apache.org/dist/hadoop/common/hadoop-2.9.0/hadoop-2.9.0-src.tar.gz
+http://www-eu.apache.org/dist/hadoop/common/hadoop-2.9.0/hadoop-2.9.0-src.tar.gz

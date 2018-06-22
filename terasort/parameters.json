@@ -1,0 +1,57 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterName": {
+            "value": "terasort"
+        },
+        "adminUsername": {
+            "value": "localadmin"
+        },
+        "adminPassword": {
+            "value": ""
+        },
+        "storageAccountType": {
+            "value": "Standard_LRS"
+        },
+        "masterNodeVMSize": {
+            "value": "Standard_D3_v2"
+        },
+        "workerNodeVMSize": {
+            "value": "Standard_DS4_v2"
+        },
+        "numberWorkerNodes": {
+            "value": 8
+        },
+        "dataDiskSize": {
+            "value": 128
+        },
+        "numberMappers": {
+            "value": 1024
+        },
+        "numberReducers": {
+            "value": 8192
+        },
+        "storageAccountName": {
+            "value": "perfOut"
+        },
+        "containerName": {
+            "value": "terasort"
+        },
+        "pollingInterval": {
+            "value": 1
+        },
+        "batchSize": {
+            "value": 10
+        },
+        "timeout": {
+            "value": 60
+        },
+        "armEndpoint": {
+            "value": "https://management.local.azurestack.external"
+        },
+        "storageEndpoint": {
+            "value": "local.azurestack.external"
+        }
+    }
+}
