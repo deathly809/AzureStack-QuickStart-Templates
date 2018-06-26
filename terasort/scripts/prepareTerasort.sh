@@ -35,7 +35,7 @@ function install_tools () {
     # Install perf tools
     sudo apt install -y bmon sysstat linux-tools-`uname -r` perf-tools-unstable bcc-tools libssl-dev libffi-dev python-dev build-essential
 
-    $SAMPLES=((60 / $INTERVAL))
+    SAMPLES=$((60 / $INTERVAL))
 
     # Run cron job every minute.
     sed -i -e "s+^5-55/10+*/1+g" /etc/cron.d/sysstat
