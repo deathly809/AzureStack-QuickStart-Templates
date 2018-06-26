@@ -32,12 +32,6 @@
         "numberReducers": {
             "value": 8192
         },
-        "storageAccountName": {
-            "value": "perfOut"
-        },
-        "containerName": {
-            "value": "terasort"
-        },
         "pollingInterval": {
             "value": 1
         },
@@ -47,11 +41,8 @@
         "timeout": {
             "value": 60
         },
-        "armEndpoint": {
-            "value": "https://management.local.azurestack.external"
-        },
-        "storageEndpoint": {
-            "value": "local.azurestack.external"
+        "baseURI" : {
+            "value": "https://raw.githubusercontent.com/deathly809/AzureStack-QuickStart-Templates/hadoop/terasort"
         }
     }
 }

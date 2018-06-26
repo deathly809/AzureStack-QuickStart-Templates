@@ -31,3 +31,5 @@ yarn jar $EXAMPLES -Dmapreduce.job.maps=MAPPERS -Dmapreduce.job.reduces=REDUCERS
 
 # Remove all at jobs in the queue
 for i in `atq | awk '{print $1}'`;do atrm $i;done
+
+touch /tmp/TERASORT_DONE.txt
