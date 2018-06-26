@@ -16,34 +16,6 @@ TIMEOUT="${4}"
 
 function install_tools () {
 
-
-    function install_cli() {
-        $count = 0;
-        $installFinished = $false;
-        while (!$installFinished -and $count -lt 5)
-        {
-            pip install --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge > azurecliinstall.log 2>&1
-            if (-not $LASTEXITCODE)
-            {
-                $installFinished = $true
-                echo "CLI installed successfully"
-            }
-        else
-            {
-                ${count}++
-                echo "Error code from the CLI installation - ${LASTEXITCODE}"
-                echo "Could not install CLI.  Trying again (${count} / 5)"
-                sleep 5m
-            }
-        }
-        if (!$installFinished)
-        {
-            echo "Could not install Azure CLI"
-            exit 1
-        }
-        sudo cat /var/lib/waagent/Certificates.pem >> ~/lib/azure-cli/lib/python2.7/site-packages/certifi/cacert.pem
-    }
-
     # Add debugging symbols repos
     echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ddebs.list
     echo "deb http://ddebs.ubuntu.com $(lsb_release -cs)-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ddebs.list
@@ -62,9 +34,6 @@ function install_tools () {
 
     # Install perf tools
     sudo apt install -y bmon sysstat linux-tools-`uname -r` perf-tools-unstable bcc-tools libssl-dev libffi-dev python-dev build-essential
-
-    # Install the CLI and certificate
-    install_cli
 
     $SAMPLES=((60 / $INTERVAL))
 
