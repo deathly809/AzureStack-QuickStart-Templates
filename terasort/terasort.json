@@ -229,7 +229,7 @@
                 "settings": {
                     "timestamp": 2,
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/prepareTerasort.sh')]"
+                        "[concat(parameters('baseURI'),'/scripts/prepareTerasort.sh')]"
                     ],
                     "commandToExecute": "[concat('bash prepareTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('pollingInterval'),' ',parameters('timeout'))]"
                 }
@@ -258,7 +258,7 @@
                 "settings": {
                     "timestamp": 2,
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/prepareTerasort.sh')]"
+                        "[concat(parameters('baseURI'),'/scripts/prepareTerasort.sh')]"
                     ],
                     "commandToExecute": "[concat('bash prepareTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('pollingInterval'),' ',parameters('timeout'))]"
                 }
@@ -284,7 +284,7 @@
                 "settings": {
                     "timestamp": 2,
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/runTerasort.sh')]"
+                        "[concat(parameters('baseURI'),'/scripts/runTerasort.sh')]"
                     ],
                     "commandToExecute": "[concat('bash runTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('numberMappers'),' ',parameters('numberReducers'),' ',parameters('timeout'))]"
                 }
