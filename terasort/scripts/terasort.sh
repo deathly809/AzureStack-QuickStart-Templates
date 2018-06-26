@@ -38,29 +38,5 @@ yarn jar $EXAMPLES -Dmapreduce.job.maps=MAPPERS -Dmapreduce.job.reduces=REDUCERS
 # Teravalidate
 yarn jar $EXAMPLES -Dmapreduce.job.maps=MAPPERS -Dmapreduce.job.reduces=REDUCERS teravalidate $SORTED $VALIDATED > teravalidate.stdout 2> teravalidate.stderr
 
-# Copy to storage share
-az cloud register --name Tenant \
-        --endpoint-resource-manager 'ARM_ENDPOINT' \
-        --suffix-storage-endpoint 'STORAGE_ENDPOINT' \
-        --profile 2017-03-09-profile
-az login --username 'USER_NAME' --password 'PASSWORD' --tenant 'TENANT_ID'
-
-export AZURE_STORAGE_ACCOUNT='STORAGE_ACCOUNT'
-export AZURE_STORAGE_KEY=`az storage account keys list --output tsv | head -n 1 | awk '{print $3}'`
-
-# Upload to the container
-CloudUpload teragen.stdout
-CloudUpload teragen.stderr
-
-CloudUpload terasort.stdout
-CloudUpload terasort.stderr
-
-CloudUpload teravalidate.stdout
-CloudUpload teravalidate.stderr
-
-# Notify that we are done
-echo "SUCCESS" >> RESULTS.txt
-CloudUpload RESULTS.txt
-
 # Remove all at jobs in the queue
 for i in `atq | awk '{print $1}'`;do atrm $i;done

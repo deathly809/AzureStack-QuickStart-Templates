@@ -233,71 +233,6 @@
             }
         },
         {
-            "name": "[concat(parameters('clusterName'),variables('masters')[copyIndex()],'/certMasterCustomScript')]",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "location": "[resourceGroup().location]",
-            "copy": {
-                "name": "masterInstallCerts",
-                "count": "[variables('numberMasters')]"
-            },
-            "apiVersion": "2016-03-30",
-            "tags": {
-                "displayName": "Sets up the master to monitor performance."
-            },
-            "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.0",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "timestamp": 1,
-                    "script": "IyEvYmluL2Jhc2gNCmNkIC92YXIvbGliL3dhYWdlbnQNCm1rZGlyIGNlcnRkaXIgLWYNCmZvciBDRVJUIGluIGBncmVwIC1sIEJhZyAqLmNydCBgOw0KZG8NCiAgICBjcCAkQ0VSVCBjZXJ0ZGlyDQpkb25lDQojDQojIExpbnV4DQojDQojICIvdXNyL2xpYi9zc2wvY2VydHMucGVtIiwgICAgICAgICAgICAgICAgICAgICAgICAgICAgLy8gSGV1cmlzdGljDQojICIvZXRjL3NzbC9jZXJ0cy9jYS1jZXJ0aWZpY2F0ZXMuY3J0IiwgICAgICAgICAgICAgICAgLy8gRGViaWFuL1VidW50dS9HZW50b28gZXRjLg0KIyAiL2V0Yy9wa2kvdGxzL2NlcnRzL2NhLWJ1bmRsZS5jcnQiLCAgICAgICAgICAgICAgICAgIC8vIEZlZG9yYS9SSEVMIDYNCiMgIi9ldGMvc3NsL2NhLWJ1bmRsZS5wZW0iLCAgICAgICAgICAgICAgICAgICAgICAgICAgICAvLyBPcGVuU1VTRQ0KIyAiL2V0Yy9wa2kvdGxzL2NhY2VydC5wZW0iLCAgICAgICAgICAgICAgICAgICAgICAgICAgIC8vIE9wZW5FTEVDDQojICIvZXRjL3BraS9jYS10cnVzdC9leHRyYWN0ZWQvcGVtL3Rscy1jYS1idW5kbGUucGVtIiwgLy8gQ2VudE9TL1JIRUwgNw0KIw0KIyBVbml4IChOb3Qgc3VwcG9ydGVkKQ0KIw0KIyAiL2V0Yy9zc2wvY2VydHMiLCAgICAgICAgICAgICAgIC8vIFNMRVMxMC9TTEVTMTEsIGh0dHBzOi8vZ29sYW5nLm9yZy9pc3N1ZS8xMjEzOQ0KIyAiL3N5c3RlbS9ldGMvc2VjdXJpdHkvY2FjZXJ0cyIsIC8vIEFuZHJvaWQNCiMgIi91c3IvbG9jYWwvc2hhcmUvY2VydHMiLCAgICAgICAvLyBGcmVlQlNEDQojICIvZXRjL3BraS90bHMvY2VydHMiLCAgICAgICAgICAgLy8gRmVkb3JhL1JIRUwNCiMgIi9ldGMvb3BlbnNzbC9jZXJ0cyIsICAgICAgICAgICAvLyBOZXRCU0QNCiMNCmZvciBGIGluICouY3J0OyBkbyBvcGVuc3NsIHg1MDkgLWluICRGIC1vdXQgIiR7RiUuKn0iLnBlbSAtb3V0Zm9ybSBQRU07IGRvbmUNCmNhdCAqLnBlbSA+IHRlbXBvcmFyeS5jcnQNCmZ1bmN0aW9uIGluc3RhbGwgew0KICAgIEZST009JDA7VE89JDE7c2hpZnQ7c2hpZnQ7RlVOQ1RJT049IiRAIg0KICAgIGlmIFsgLWYgIiRUTyAiIF07IHRoZW4NCiAgICAgICAgY2F0ICRGUk9NID4+ICRUTw0KICAgICAgICAkRlVOQ1RJT04NCiAgICBmaQ0KfQ0KIyBIYWNreQ0KdG91Y2ggJy91c3IvbGliL3NzbC9jZXJ0cy5wZW0nDQppbnN0YWxsIGNlcnRkaXIvdGVtcG9yYXJ5LmNydCAnL3Vzci9saWIvc3NsL2NlcnRzLnBlbScNCiMgS25vd24gbG9jYXRpb25zDQppbnN0YWxsIGNlcnRkaXIvdGVtcG9yYXJ5LmNydCAiL2V0Yy9zc2wvY2VydHMvY2EtY2VydGlmaWNhdGVzLmNydCIgdXBkYXRlLWNhLWNlcnRpZmljYXRlcw0KaW5zdGFsbCBjZXJ0ZGlyL3RlbXBvcmFyeS5jcnQgIi9ldGMvcGtpL3Rscy9jZXJ0cy9jYS1idW5kbGUuY3J0Ig0KaW5zdGFsbCBjZXJ0ZGlyL3RlbXBvcmFyeS5jcnQgIi9ldGMvc3NsL2NhLWJ1bmRsZS5wZW0iDQppbnN0YWxsIGNlcnRkaXIvdGVtcG9yYXJ5LmNydCAiL2V0Yy9wa2kvY2EtdHJ1c3QvZXh0cmFjdGVkL3BlbS90bHMtY2EtYnVuZGxlLnBlbSIgdXBkYXRlLWNhLXRydXN0IGV4dHJhY3QNCg=="
-                }
-            }
-        },
-        {
-            "name": "[concat(variables('defaultName'),'Worker',copyIndex(),'/certWorkerCustomScript')]",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "location": "[resourceGroup().location]",
-            "copy": {
-                "name": "workerInstallCerts",
-                "count": "[parameters('numberWorkerNodes')]"
-            },
-            "apiVersion": "2016-03-30",
-            "tags": {
-                "displayName": "Install certs on workers."
-            },
-            "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.0",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "timestamp": 1,
-                    "script": "IyEvYmluL2Jhc2gNCmNkIC92YXIvbGliL3dhYWdlbnQNCm1rZGlyIGNlcnRkaXIgLWYNCmZvciBDRVJUIGluIGBncmVwIC1sIEJhZyAqLmNydCBgOw0KZG8NCiAgICBjcCAkQ0VSVCBjZXJ0ZGlyDQpkb25lDQojDQojIExpbnV4DQojDQojICIvdXNyL2xpYi9zc2wvY2VydHMucGVtIiwgICAgICAgICAgICAgICAgICAgICAgICAgICAgLy8gSGV1cmlzdGljDQojICIvZXRjL3NzbC9jZXJ0cy9jYS1jZXJ0aWZpY2F0ZXMuY3J0IiwgICAgICAgICAgICAgICAgLy8gRGViaWFuL1VidW50dS9HZW50b28gZXRjLg0KIyAiL2V0Yy9wa2kvdGxzL2NlcnRzL2NhLWJ1bmRsZS5jcnQiLCAgICAgICAgICAgICAgICAgIC8vIEZlZG9yYS9SSEVMIDYNCiMgIi9ldGMvc3NsL2NhLWJ1bmRsZS5wZW0iLCAgICAgICAgICAgICAgICAgICAgICAgICAgICAvLyBPcGVuU1VTRQ0KIyAiL2V0Yy9wa2kvdGxzL2NhY2VydC5wZW0iLCAgICAgICAgICAgICAgICAgICAgICAgICAgIC8vIE9wZW5FTEVDDQojICIvZXRjL3BraS9jYS10cnVzdC9leHRyYWN0ZWQvcGVtL3Rscy1jYS1idW5kbGUucGVtIiwgLy8gQ2VudE9TL1JIRUwgNw0KIw0KIyBVbml4IChOb3Qgc3VwcG9ydGVkKQ0KIw0KIyAiL2V0Yy9zc2wvY2VydHMiLCAgICAgICAgICAgICAgIC8vIFNMRVMxMC9TTEVTMTEsIGh0dHBzOi8vZ29sYW5nLm9yZy9pc3N1ZS8xMjEzOQ0KIyAiL3N5c3RlbS9ldGMvc2VjdXJpdHkvY2FjZXJ0cyIsIC8vIEFuZHJvaWQNCiMgIi91c3IvbG9jYWwvc2hhcmUvY2VydHMiLCAgICAgICAvLyBGcmVlQlNEDQojICIvZXRjL3BraS90bHMvY2VydHMiLCAgICAgICAgICAgLy8gRmVkb3JhL1JIRUwNCiMgIi9ldGMvb3BlbnNzbC9jZXJ0cyIsICAgICAgICAgICAvLyBOZXRCU0QNCiMNCmZvciBGIGluICouY3J0OyBkbyBvcGVuc3NsIHg1MDkgLWluICRGIC1vdXQgIiR7RiUuKn0iLnBlbSAtb3V0Zm9ybSBQRU07IGRvbmUNCmNhdCAqLnBlbSA+IHRlbXBvcmFyeS5jcnQNCmZ1bmN0aW9uIGluc3RhbGwgew0KICAgIEZST009JDA7VE89JDE7c2hpZnQ7c2hpZnQ7RlVOQ1RJT049IiRAIg0KICAgIGlmIFsgLWYgIiRUTyAiIF07IHRoZW4NCiAgICAgICAgY2F0ICRGUk9NID4+ICRUTw0KICAgICAgICAkRlVOQ1RJT04NCiAgICBmaQ0KfQ0KIyBIYWNreQ0KdG91Y2ggJy91c3IvbGliL3NzbC9jZXJ0cy5wZW0nDQppbnN0YWxsIGNlcnRkaXIvdGVtcG9yYXJ5LmNydCAnL3Vzci9saWIvc3NsL2NlcnRzLnBlbScNCiMgS25vd24gbG9jYXRpb25zDQppbnN0YWxsIGNlcnRkaXIvdGVtcG9yYXJ5LmNydCAiL2V0Yy9zc2wvY2VydHMvY2EtY2VydGlmaWNhdGVzLmNydCIgdXBkYXRlLWNhLWNlcnRpZmljYXRlcw0KaW5zdGFsbCBjZXJ0ZGlyL3RlbXBvcmFyeS5jcnQgIi9ldGMvcGtpL3Rscy9jZXJ0cy9jYS1idW5kbGUuY3J0Ig0KaW5zdGFsbCBjZXJ0ZGlyL3RlbXBvcmFyeS5jcnQgIi9ldGMvc3NsL2NhLWJ1bmRsZS5wZW0iDQppbnN0YWxsIGNlcnRkaXIvdGVtcG9yYXJ5LmNydCAiL2V0Yy9wa2kvY2EtdHJ1c3QvZXh0cmFjdGVkL3BlbS90bHMtY2EtYnVuZGxlLnBlbSIgdXBkYXRlLWNhLXRydXN0IGV4dHJhY3QNCg=="
-                }
-            }
-        },
-        {
-            "name": "[concat(variables('defaultName'),'Jumpbox/certJumpboxCustomScript')]",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "location": "[resourceGroup().location]",
-            "apiVersion": "2016-03-30",
-            "tags": {
-                "displayName": "Install certs on JumpBox."
-            },
-            "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.0",
-                "autoUpgradeMinorVersion": "true",
-                "settings": {
-                    "timestamp": 1,
-                    "script": "IyEvYmluL2Jhc2gNCmNkIC92YXIvbGliL3dhYWdlbnQNCm1rZGlyIGNlcnRkaXIgLWYNCmZvciBDRVJUIGluIGBncmVwIC1sIEJhZyAqLmNydCBgOw0KZG8NCiAgICBjcCAkQ0VSVCBjZXJ0ZGlyDQpkb25lDQojDQojIExpbnV4DQojDQojICIvdXNyL2xpYi9zc2wvY2VydHMucGVtIiwgICAgICAgICAgICAgICAgICAgICAgICAgICAgLy8gSGV1cmlzdGljDQojICIvZXRjL3NzbC9jZXJ0cy9jYS1jZXJ0aWZpY2F0ZXMuY3J0IiwgICAgICAgICAgICAgICAgLy8gRGViaWFuL1VidW50dS9HZW50b28gZXRjLg0KIyAiL2V0Yy9wa2kvdGxzL2NlcnRzL2NhLWJ1bmRsZS5jcnQiLCAgICAgICAgICAgICAgICAgIC8vIEZlZG9yYS9SSEVMIDYNCiMgIi9ldGMvc3NsL2NhLWJ1bmRsZS5wZW0iLCAgICAgICAgICAgICAgICAgICAgICAgICAgICAvLyBPcGVuU1VTRQ0KIyAiL2V0Yy9wa2kvdGxzL2NhY2VydC5wZW0iLCAgICAgICAgICAgICAgICAgICAgICAgICAgIC8vIE9wZW5FTEVDDQojICIvZXRjL3BraS9jYS10cnVzdC9leHRyYWN0ZWQvcGVtL3Rscy1jYS1idW5kbGUucGVtIiwgLy8gQ2VudE9TL1JIRUwgNw0KIw0KIyBVbml4IChOb3Qgc3VwcG9ydGVkKQ0KIw0KIyAiL2V0Yy9zc2wvY2VydHMiLCAgICAgICAgICAgICAgIC8vIFNMRVMxMC9TTEVTMTEsIGh0dHBzOi8vZ29sYW5nLm9yZy9pc3N1ZS8xMjEzOQ0KIyAiL3N5c3RlbS9ldGMvc2VjdXJpdHkvY2FjZXJ0cyIsIC8vIEFuZHJvaWQNCiMgIi91c3IvbG9jYWwvc2hhcmUvY2VydHMiLCAgICAgICAvLyBGcmVlQlNEDQojICIvZXRjL3BraS90bHMvY2VydHMiLCAgICAgICAgICAgLy8gRmVkb3JhL1JIRUwNCiMgIi9ldGMvb3BlbnNzbC9jZXJ0cyIsICAgICAgICAgICAvLyBOZXRCU0QNCiMNCmZvciBGIGluICouY3J0OyBkbyBvcGVuc3NsIHg1MDkgLWluICRGIC1vdXQgIiR7RiUuKn0iLnBlbSAtb3V0Zm9ybSBQRU07IGRvbmUNCmNhdCAqLnBlbSA+IHRlbXBvcmFyeS5jcnQNCmZ1bmN0aW9uIGluc3RhbGwgew0KICAgIEZST009JDA7VE89JDE7c2hpZnQ7c2hpZnQ7RlVOQ1RJT049IiRAIg0KICAgIGlmIFsgLWYgIiRUTyAiIF07IHRoZW4NCiAgICAgICAgY2F0ICRGUk9NID4+ICRUTw0KICAgICAgICAkRlVOQ1RJT04NCiAgICBmaQ0KfQ0KIyBIYWNreQ0KdG91Y2ggJy91c3IvbGliL3NzbC9jZXJ0cy5wZW0nDQppbnN0YWxsIGNlcnRkaXIvdGVtcG9yYXJ5LmNydCAnL3Vzci9saWIvc3NsL2NlcnRzLnBlbScNCiMgS25vd24gbG9jYXRpb25zDQppbnN0YWxsIGNlcnRkaXIvdGVtcG9yYXJ5LmNydCAiL2V0Yy9zc2wvY2VydHMvY2EtY2VydGlmaWNhdGVzLmNydCIgdXBkYXRlLWNhLWNlcnRpZmljYXRlcw0KaW5zdGFsbCBjZXJ0ZGlyL3RlbXBvcmFyeS5jcnQgIi9ldGMvcGtpL3Rscy9jZXJ0cy9jYS1idW5kbGUuY3J0Ig0KaW5zdGFsbCBjZXJ0ZGlyL3RlbXBvcmFyeS5jcnQgIi9ldGMvc3NsL2NhLWJ1bmRsZS5wZW0iDQppbnN0YWxsIGNlcnRkaXIvdGVtcG9yYXJ5LmNydCAiL2V0Yy9wa2kvY2EtdHJ1c3QvZXh0cmFjdGVkL3BlbS90bHMtY2EtYnVuZGxlLnBlbSIgdXBkYXRlLWNhLXRydXN0IGV4dHJhY3QNCg=="
-                }
-            }
-        },
-        {
             "comments": "Storage account which holds all performance data.",
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[toLower(parameters('storageAccountName'))]",
@@ -335,7 +270,7 @@
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/prepareTerasort.sh')]"
                     ],
-                    "commandToExecute": "[concat('bash prepareTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',variables('tenantId'),' ',parameters('armEndpoint'),parameters('storageEndpoint'),' ',' ',parameters('storageAccountName'),' ',parameters('containerName'),' ',parameters('pollingInterval'),' ',parameters('timeout'))]"
+                    "commandToExecute": "[concat('bash prepareTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('pollingInterval'),' ',parameters('timeout'))]"
                 }
             }
         },
@@ -364,7 +299,7 @@
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/prepareTerasort.sh')]"
                     ],
-                    "commandToExecute": "[concat('bash prepareTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',variables('tenantId'),' ',parameters('armEndpoint'),parameters('storageEndpoint'),' ',' ',parameters('storageAccountName'),' ',parameters('containerName'),' ',parameters('pollingInterval'),' ',parameters('timeout'))]"
+                    "commandToExecute": "[concat('bash prepareTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('pollingInterval'),' ',parameters('timeout'))]"
                 }
             }
         },

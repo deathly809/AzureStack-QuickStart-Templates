@@ -38,7 +38,7 @@ function kill_terasort() {
     done
 }
 
-write_output
+# write_output
 
 kill_terasort
 

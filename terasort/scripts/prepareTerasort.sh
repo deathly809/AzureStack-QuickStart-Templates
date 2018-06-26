@@ -13,14 +13,15 @@
 
 USERNAME="${1}"
 PASSWORD="${2}"
-TENANTID="${3}"
-ARM_ENDPOINT="${4}"
-STORAGE_ACCOUNT="${5}"
-CONTAINER="${6}"
-STORAGE_ENDPOINT="${7}"
-POLLING_INTERVAL="${8}"
-TIMEOUT="${9}"
+POLLING_INTERVAL="${3}"
+TIMEOUT="${4}"
 
+# Broken
+# TENANTID="${5}"
+# ARM_ENDPOINT="${6}"
+# STORAGE_ENDPOINT="${7}"
+# STORAGE_ACCOUNT="${8}"
+# CONTAINER="${9}"
 
 function install_tools () {
 
@@ -88,10 +89,9 @@ function install_tools () {
 }
 
 function create_job {
-
     # Update the constants
     sed -i -e "s/STORAGE_ACCOUNT/${STORAGE_ACCOUNT}/g"      upload_job.sh
-    sed -i -e "s/ARM_ENDPOINT/${ARM_ENDPOINT}/g"              upload_job.sh
+    sed -i -e "s/ARM_ENDPOINT/${ARM_ENDPOINT}/g"            upload_job.sh
     sed -i -e "s/STORAGE_ENDPOINT/${STORAGE_ENDPOINT}/g"    upload_job.sh
     sed -i -e "s/USER_NAME/${USER_NAME}/g"                  upload_job.sh
     sed -i -e "s/PASSWORD/${PASSWORD}/g"                    upload_job.sh
@@ -111,6 +111,6 @@ function create_timeout_job {
 install_tools
 
 # Create a job to monitor to wait to upload data
-create_job
+# create_job
 
 create_timeout_job $TIMEOUT

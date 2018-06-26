@@ -19,11 +19,11 @@ PASSWORD="${2}"
 MAPPERS="${3}"
 REDUCERS="${4}"
 TIMEOUT="${5}"
-TENANT_ID="${6}"
-STORAGE_ACCOUNT="${7}"
-CONTAINER="$8"
-ARM_ENDPOINT="${9}"
-STORAGE_ENDPOINT="${10}"
+# TENANT_ID="${6}"
+# STORAGE_ACCOUNT="${7}"
+# CONTAINER="$8"
+# ARM_ENDPOINT="${9}"
+# STORAGE_ENDPOINT="${10}"
 
 function install_prereqs() {
     apt-get update > /dev/null
@@ -66,7 +66,7 @@ function run_terasort() {
     sed -i -e "s/REDUCERS/$REDUCERS/g" $PWD/terasort.sh
     sed -i -e "s/USER_NAME/$USER_NAME/g" $PWD/terasort.sh
     sed -i -e "s/PASSWORD/$PASSWORD/g" $PWD/terasort.sh
-    sed -i -e "s/TENANT_ID/$TENANT_ID/g" $PWD/terasort.sh
+    # sed -i -e "s/TENANT_ID/$TENANT_ID/g" $PWD/terasort.sh
 
     echo "$PWD/terasort.sh" | at now
 }
@@ -91,7 +91,10 @@ install_prereqs
 # Update terasort code to not be broken
 update_terasort
 
-create_timeout_job $TIMEOUT
+# Create a job which will kill terasort
+# after a certain amount of time
+# create_timeout_job $TIMEOUT
+echo "$PWD/terminate.sh" | at now + $TIMEOUT minutes
 
 # Run terasort in the background
 run_terasort
