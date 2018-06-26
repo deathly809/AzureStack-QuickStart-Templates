@@ -110,18 +110,6 @@
                 "description": "Number of reducers for Terasort. This is also used to generate and validate."
             }
         },
-        "storageAccountName": {
-            "type": "string",
-            "metadata": {
-                "description": "Storage account where results are saved."
-            }
-        },
-        "containerName": {
-            "type": "string",
-            "metadata": {
-                "description": "The name of the container."
-            }
-        },
         "pollingInterval": {
             "type": "int",
             "defaultValue": 1,
@@ -164,22 +152,9 @@
             "metadata": {
                 "description": "Timeout in minutes before we cancel Terasort."
             }
-        },
-        "armEndpoint": {
-            "type": "string",
-            "metadata": {
-                "description": "ARM Endpoint to login to."
-            }
-        },
-        "storageEndpoint": {
-            "type": "string",
-            "metadata": {
-                "description": "Storage endpoint for storage operations."
-            }
         }
     },
     "variables": {
-        "location": "[resourceGroup().location]",
         "defaultName": "[parameters('clusterName')]",
         "masters": [
             "NameNode",
@@ -187,8 +162,7 @@
             "JobHistory"
         ],
         "numberMasters": "[length(variables('masters'))]",
-        "githubURI": "https://raw.githubusercontent.com/deathly809/AzureStack-QuickStart-Templates/hadoop/hadoop",
-        "tenantId": "[subscription().tenantId]"
+        "githubURI": "https://raw.githubusercontent.com/deathly809/AzureStack-QuickStart-Templates/hadoop/hadoop"
     },
     "resources": [
         {
@@ -230,19 +204,6 @@
                         "value": "[parameters('batchSize')]"
                     }
                 }
-            }
-        },
-        {
-            "comments": "Storage account which holds all performance data.",
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[toLower(parameters('storageAccountName'))]",
-            "apiVersion": "2016-01-01",
-            "location": "[variables('location')]",
-            "dependsOn": [
-                "linkedTemplate"
-            ],
-            "properties": {
-                "accountType": "[parameters('storageAccountType')]"
             }
         },
         {
@@ -325,7 +286,7 @@
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/runTerasort.sh')]"
                     ],
-                    "commandToExecute": "[concat('bash runTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('numberMappers'),' ',parameters('numberReducers'),' ',parameters('timeout'),' ',variables('tenantId'),' ',parameters('storageAccountName'),' ',parameters('containerName'),' ',parameters('armEndpoint'),' ',parameters('storageEndpoint'))]"
+                    "commandToExecute": "[concat('bash runTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('numberMappers'),' ',parameters('numberReducers'),' ',parameters('timeout'))]"
                 }
             }
         }

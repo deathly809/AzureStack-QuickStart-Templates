@@ -19,11 +19,6 @@ PASSWORD="${2}"
 MAPPERS="${3}"
 REDUCERS="${4}"
 TIMEOUT="${5}"
-# TENANT_ID="${6}"
-# STORAGE_ACCOUNT="${7}"
-# CONTAINER="$8"
-# ARM_ENDPOINT="${9}"
-# STORAGE_ENDPOINT="${10}"
 
 function install_prereqs() {
     apt-get update > /dev/null
@@ -61,27 +56,15 @@ function update_terasort() {
 
 function run_terasort() {
     # Replace variables
-    sed -i -e "s/STORAGE_ACCOUNT/${STORAGE_ACCOUNT}/g"  terasort.sh
     sed -i -e "s/MAPPERS/$MAPPERS/g" $PWD/terasort.sh
     sed -i -e "s/REDUCERS/$REDUCERS/g" $PWD/terasort.sh
     sed -i -e "s/USER_NAME/$USER_NAME/g" $PWD/terasort.sh
     sed -i -e "s/PASSWORD/$PASSWORD/g" $PWD/terasort.sh
-    # sed -i -e "s/TENANT_ID/$TENANT_ID/g" $PWD/terasort.sh
-
     echo "$PWD/terasort.sh" | at now
 }
 
 function create_timeout_job {
     local $TO = $1
-
-    sed -i -e "s/STORAGE_ACCOUNT/${STORAGE_ACCOUNT}/g"  terminate.sh
-    sed -i -e "s/USER_NAME/${USER_NAME}/g" $PWD/terminate.sh
-    sed -i -e "s/PASSWORD/${PASSWORD}/g" $PWD/terminate.sh
-    sed -i -e "s/TENANT_ID/${TENANT_ID}/g" $PWD/terminate.sh
-    sed -i -e "s/CONTAINER/${CONTAINER}/g" $PWD/terminate.sh
-    sed -i -e "s/ARM_ENDPOINT/${ARM_ENDPOINT}/g" $PWD/terminate.sh
-    sed -i -e "s/STORAGE_ENDPOINT/${STORAGE_ENDPOINT}/g" $PWD/terminate.sh
-
     echo "$PWD/terminate.sh" | at now + $TO minutes
 }
 
@@ -91,10 +74,8 @@ install_prereqs
 # Update terasort code to not be broken
 update_terasort
 
-# Create a job which will kill terasort
-# after a certain amount of time
-# create_timeout_job $TIMEOUT
-echo "$PWD/terminate.sh" | at now + $TIMEOUT minutes
+# Create a job which will kill all YARN jobs
+create_timeout_job $TIMEOUT
 
 # Run terasort in the background
 run_terasort

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-#   The purpose of this script is to run terasort and upload results to blob storage.
+#   The purpose of this script is to run terasort
 #
 #
 #   Need to use sed to replace the following parameters:
@@ -9,16 +9,7 @@
 #       REDUCERS
 #       USER_NAME
 #       PASSWORD
-#       TENANT_ID
-#       CONTAINER
-#       ARM_ENDPOINT
-#       STORAGE_ENDPOINT
 #
-
-# Helper functions
-function CloudUpload() {
-    az storage blob upload --container-name 'CONTAINER' --file "$1" --name "$1"
-}
 
 # Run as
 export HADOOP_USER_NAME=hadoop

@@ -1,13 +1,10 @@
 #!/bin/bash
 
 #
-# This script has three main parts
-#   1. Install all needed tools for monitoring and saving results.
-#   2. Start a job which monitors and records data and stores it in the provided storage account.
-#   3. Watch for termination message in the storage account.
+# This script does the following
 #
-#   Of the three the last is the most important.  In order to make sure #3 happens we
-#   also provide a timeout which will signal a job that terminates the uploading job.
+#   1. Install all needed tools for monitoring and saving results.
+#   2. Create a timeout job
 #
 #
 
@@ -16,12 +13,6 @@ PASSWORD="${2}"
 POLLING_INTERVAL="${3}"
 TIMEOUT="${4}"
 
-# Broken
-# TENANTID="${5}"
-# ARM_ENDPOINT="${6}"
-# STORAGE_ENDPOINT="${7}"
-# STORAGE_ACCOUNT="${8}"
-# CONTAINER="${9}"
 
 function install_tools () {
 
@@ -88,20 +79,6 @@ function install_tools () {
     sudo service sysstat restart
 }
 
-function create_job {
-    # Update the constants
-    sed -i -e "s/STORAGE_ACCOUNT/${STORAGE_ACCOUNT}/g"      upload_job.sh
-    sed -i -e "s/ARM_ENDPOINT/${ARM_ENDPOINT}/g"            upload_job.sh
-    sed -i -e "s/STORAGE_ENDPOINT/${STORAGE_ENDPOINT}/g"    upload_job.sh
-    sed -i -e "s/USER_NAME/${USER_NAME}/g"                  upload_job.sh
-    sed -i -e "s/PASSWORD/${PASSWORD}/g"                    upload_job.sh
-    sed -i -e "s/TENANT_ID/${TENANT_ID}/g"                  upload_job.sh
-    sed -i -e "s/CONTAINER/${CONTAINER}/g"                  upload_job.sh
-
-    # Every 5 minutes run our job
-    crontab */5 * * * * upload_job.sh
-}
-
 function create_timeout_job {
     local $TO = $1
     echo "sed -i -e 's/true/false/g' /etc/default/sysstat; sudo service sysstat restart" | at now + $TO minutes
@@ -109,8 +86,5 @@ function create_timeout_job {
 
 # Install the tools
 install_tools
-
-# Create a job to monitor to wait to upload data
-# create_job
 
 create_timeout_job $TIMEOUT
