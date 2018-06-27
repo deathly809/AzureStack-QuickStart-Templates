@@ -40,11 +40,10 @@ function install_tools () {
         SAMPLES=1
     fi
 
-    echo "Updating values"
-    # Run cron job every minute.
+    echo "Updating CRON job values"
     sed -i -e "s+^5-55/10+\*/1+g" /etc/cron.d/sysstat
-    # record data for 60 seconds.
     sed -i -e "s/1 1$/1 $SAMPLES/g" /etc/cron.d/sysstat
+
     # Enable performance monitoring
     sed -i -e "s/false/true/g" /etc/default/sysstat
 
@@ -58,7 +57,11 @@ function create_timeout_job {
     echo "sed -i -e 's/true/false/g' /etc/default/sysstat; sudo service sysstat restart" | at now + $TO minutes
 }
 
-# Install the tools
+echo "Installing performance tools"
 install_tools
 
+echo "Creating timeout job"
 create_timeout_job $TIMEOUT
+
+echo "Done"
+exit 0
