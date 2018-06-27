@@ -229,8 +229,7 @@
                 "settings": {
                     "timestamp": 2,
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/scripts/prepareTerasort.sh')]",
-                        "[concat(parameters('baseURI'),'/config/sources.txt')]"
+                        "[concat(parameters('baseURI'),'/scripts/prepareTerasort.sh')]"
                     ],
                     "commandToExecute": "[concat('bash prepareTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('pollingInterval'),' ',parameters('timeout'))]"
                 }
@@ -259,8 +258,7 @@
                 "settings": {
                     "timestamp": 2,
                     "fileUris": [
-                        "[concat(parameters('baseURI'),'/scripts/prepareTerasort.sh')]",
-                        "[concat(parameters('baseURI'),'/config/sources.txt')]"
+                        "[concat(parameters('baseURI'),'/scripts/prepareTerasort.sh')]"
                     ],
                     "commandToExecute": "[concat('bash prepareTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('pollingInterval'),' ',parameters('timeout'))]"
                 }
@@ -287,6 +285,7 @@
                     "timestamp": 2,
                     "fileUris": [
                         "[concat(parameters('baseURI'),'/scripts/runTerasort.sh')]",
+                        "[concat(parameters('baseURI'),'/scripts/terasort.sh')]",
                         "[concat(parameters('baseURI'),'/config/sources.txt')]"
                     ],
                     "commandToExecute": "[concat('bash runTerasort.sh',' ',parameters('adminUsername'),' ',parameters('adminPassword'),' ',parameters('numberMappers'),' ',parameters('numberReducers'),' ',parameters('timeout'))]"
