@@ -34,7 +34,7 @@ function install_tools () {
     DEBIAN_FRONTEND=noninteractive apt-get install -y linux-image-`uname -r`-dbgsym bmon sysstat linux-tools-`uname -r` perf-tools-unstable bcc-tools libssl-dev libffi-dev python-dev build-essential
 
     echo "Computing samples"
-    SAMPLES=$((60/INTERVAL))
+    SAMPLES=$((60/$POLLING_INTERVAL))
     if [ "$SAMPLES" -eq "0" ];
     then
         SAMPLES=1
