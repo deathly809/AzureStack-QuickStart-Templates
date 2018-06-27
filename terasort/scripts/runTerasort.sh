@@ -47,16 +47,22 @@ function update_terasort() {
     cd './hadoop-2.9.0-src/hadoop-mapreduce-project/hadoop-mapreduce-examples'
 
     # Fix known bug
+    echo "Fixing bug"
     sed -i -e 's/(short) 10/(short) 1/g' src/main/java/org/apache/hadoop/examples/terasort/TeraInputFormat.java
 
     # Build!
+    echo "Building"
     mvn package  > /dev/null
 
     # Replace in share
+    echo "Replacing local copy"
     cp target/hadoop-mapreduce-examples-2.9.0.jar /usr/local/hadoop/share/hadoop/mapreduce/
+
+    cd -
 }
 
 function run_terasort() {
+    echo "Running terasort"
     # Replace variables
     sed -i -e "s/MAPPERS/$MAPPERS/g" $PWD/terasort.sh
     sed -i -e "s/REDUCERS/$REDUCERS/g" $PWD/terasort.sh

@@ -31,21 +31,20 @@ function install_tools () {
     apt-get update
 
     # Install debugging symbols
-    DEBIAN_FRONTEND=noninteractive apt-get install linux-image-`uname -r`-dbgsym
-
-    # Install perf tools
-    DEBIAN_FRONTEND=noninteractive apt-get install -y bmon sysstat linux-tools-`uname -r` perf-tools-unstable bcc-tools libssl-dev libffi-dev python-dev build-essential
+    DEBIAN_FRONTEND=noninteractive apt-get install -y linux-image-`uname -r`-dbgsym bmon sysstat linux-tools-`uname -r` perf-tools-unstable bcc-tools libssl-dev libffi-dev python-dev build-essential
 
     SAMPLES=$((60 / $INTERVAL))
 
+    echo "Updating values"
     # Run cron job every minute.
-    sed -i -e "s+^5-55/10+*/1+g" /etc/cron.d/sysstat
+    sed -i -e "s+^5-55/10+\*/1+g" /etc/cron.d/sysstat
     # record data for 60 seconds.
     sed -i -e "s/1 1$/1 $SAMPLES/g" /etc/cron.d/sysstat
     # Enable performance monitoring
     sed -i -e "s/false/true/g" /etc/default/sysstat
 
     # Restart service
+    echo "Restarting sysstat"
     service sysstat restart
 }
 
