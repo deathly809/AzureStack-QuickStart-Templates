@@ -20,6 +20,8 @@ MAPPERS="${3}"
 REDUCERS="${4}"
 TIMEOUT="${5}"
 
+export DEBIAN_FRONTEND=noninteractive
+
 function install_prereqs() {
     apt-get update > /dev/null
     apt-get install -y maven openjdk-8-jdk > /dev/null

@@ -13,6 +13,7 @@ PASSWORD="${2}"
 POLLING_INTERVAL="${3}"
 TIMEOUT="${4}"
 
+export DEBIAN_FRONTEND=noninteractive
 
 function install_tools () {
 
