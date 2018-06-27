@@ -50,7 +50,7 @@ function install_tools () {
 }
 
 function create_timeout_job {
-    local $TO = $1
+    local TO=$1
     echo "sed -i -e 's/true/false/g' /etc/default/sysstat; sudo service sysstat restart" | at now + $TO minutes
 }
 
