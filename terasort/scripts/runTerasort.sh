@@ -66,7 +66,7 @@ function run_terasort() {
 }
 
 function create_timeout_job {
-    local $TO = $1
+    local TO=$1
     echo "$PWD/terminate.sh" | at now + $TO minutes
 }
 
