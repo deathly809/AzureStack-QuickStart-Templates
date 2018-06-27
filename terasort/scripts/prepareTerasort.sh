@@ -18,23 +18,23 @@ export DEBIAN_FRONTEND=noninteractive
 function install_tools () {
 
     # Add debugging symbols repos
-    echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ddebs.list
-    echo "deb http://ddebs.ubuntu.com $(lsb_release -cs)-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ddebs.list
-    echo "deb http://ddebs.ubuntu.com $(lsb_release -cs)-proposed main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ddebs.list
+    echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted universe multiverse" | tee -a /etc/apt/sources.list.d/ddebs.list
+    echo "deb http://ddebs.ubuntu.com $(lsb_release -cs)-updates main restricted universe multiverse" | tee -a /etc/apt/sources.list.d/ddebs.list
+    echo "deb http://ddebs.ubuntu.com $(lsb_release -cs)-proposed main restricted universe multiverse" | tee -a /etc/apt/sources.list.d/ddebs.list
 
     # Add keys
-    wget -O - http://ddebs.ubuntu.com/dbgsym-release-key.asc | sudo apt-key add - >> /dev/null
+    wget -O - http://ddebs.ubuntu.com/dbgsym-release-key.asc | apt-key add - >> /dev/null
 
-    echo "deb [trusted=yes] https://repo.iovisor.org/apt/xenial xenial-nightly main" | sudo tee /etc/apt/sources.list.d/iovisor.list
+    echo "deb [trusted=yes] https://repo.iovisor.org/apt/xenial xenial-nightly main" | tee /etc/apt/sources.list.d/iovisor.list
 
     # Update
-    sudo apt-get update
+    apt-get update
 
     # Install debugging symbols
-    sudo apt-get install linux-image-`uname -r`-dbgsym
+    DEBIAN_FRONTEND=noninteractive apt-get install linux-image-`uname -r`-dbgsym
 
     # Install perf tools
-    sudo apt install -y bmon sysstat linux-tools-`uname -r` perf-tools-unstable bcc-tools libssl-dev libffi-dev python-dev build-essential
+    DEBIAN_FRONTEND=noninteractive apt-get install -y bmon sysstat linux-tools-`uname -r` perf-tools-unstable bcc-tools libssl-dev libffi-dev python-dev build-essential
 
     SAMPLES=$((60 / $INTERVAL))
 
@@ -46,7 +46,7 @@ function install_tools () {
     sed -i -e "s/false/true/g" /etc/default/sysstat
 
     # Restart service
-    sudo service sysstat restart
+    service sysstat restart
 }
 
 function create_timeout_job {
