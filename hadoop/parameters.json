@@ -25,6 +25,9 @@
         },
         "dataDiskSize": {
             "value": 512
+        },
+        "batchSize": {
+            "value": 10
         }
     }
 }
