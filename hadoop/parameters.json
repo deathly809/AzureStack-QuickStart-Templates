@@ -15,10 +15,10 @@
             "value": "Standard_LRS"
         },
         "masterNodeVMSize": {
-            "value": "Standard_D3_v2"
+            "value": "Standard_DS3_v2"
         },
         "workerNodeVMSize": {
-            "value": "Standard_F8"
+            "value": "Standard_DS4_v2"
         },
         "numberWorkerNodes": {
             "value": 4
