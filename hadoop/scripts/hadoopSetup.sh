@@ -47,6 +47,7 @@ function check_error() {
 #
 #
 WORKERS=$1
+DATA_REPLICATION=$2
 
 ############################################################
 #
@@ -128,69 +129,75 @@ attach_disks () {
     Log "PARTS=$PARTS"
 
     # Get the disk without any partitions.
-    local DD=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
-    Log "DD=$DD"
+    local DDs=`for d in $DISKS; do echo $PARTS | grep -vo $d && echo $d; done`
+    Log "DD=$DDs"
 
     #
     # Format/Create partitions
     #
-
-    Log "Creating label"
-    local n=0
-    until [ $n -ge 5 ];
+    local ID=0
+    for DD in $DDs;
     do
-        parted /dev/$DD mklabel gpt && break
-        n=$[$n + 1]
-        Log "Label creation failures $n"
-        sleep 10
+        MOUNT_NAME="$MOUNT$ID"
+        ID=$[$ID + 1]
+
+        Log "Creating label"
+        local n=0
+        until [ $n -ge 5 ];
+        do
+            parted /dev/$DD mklabel gpt && break
+            n=$[$n + 1]
+            Log "Label creation failures $n"
+            sleep 10
+        done
+
+        Log "Creating partition"
+        n=0
+        until [ $n -ge 5 ];
+        do
+            parted -a opt /dev/$DD mkpart primary ext4 0% 100% && break
+            n=$[$n + 1]
+            Log "Partition creation failures $n"
+            sleep 10
+        done
+
+        # write file-system lazily for performance reasons.
+        n=0
+        until [ $n -ge 5 ];
+        do
+            mkfs.ext4 -L datapartition /dev/${DD}1 -F && break
+            n=$[$n + 1]
+            Log "FS creation failures $n"
+            sleep 10
+        done
+
+        # Create mount point
+        mkdir $MOUNT_NAME -p
+
+        #
+        # Add to FSTAB
+        #
+
+        # Get the UUID
+        blkid -s none
+        local UUID=`blkid -s UUID -o value /dev/${DD}1`
+        local LINE=""
+
+        if [ -z "$UUID" ]; then
+            # Fall back to disk
+            LINE="$/dev/${DD}1\t$MOUNT_NAME\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
+        else
+            # Use UUID
+            LINE="UUID=$UUID\t$MOUNT_NAME\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
+        fi
+
+        Log "Adding '$LINE' to FSTAB"
+        echo -e "$LINE" >> /etc/fstab
+
+        # mount
+        mount $MOUNT_NAME
+        check_error $? "Could not mount $DD to $MOUNT_NAME"
     done
-
-    Log "Creating partition"
-    n=0
-    until [ $n -ge 5 ];
-    do
-        parted -a opt /dev/$DD mkpart primary ext4 0% 100% && break
-        n=$[$n + 1]
-        Log "Partition creation failures $n"
-        sleep 10
-    done
-
-    # write file-system lazily for performance reasons.
-    n=0
-    until [ $n -ge 5 ];
-    do
-        mkfs.ext4 -L datapartition /dev/${DD}1 -F && break
-        n=$[$n + 1]
-        Log "FS creation failures $n"
-        sleep 10
-    done
-
-    # Create mount point
-    mkdir $MOUNT -p
-
-    #
-    # Add to FSTAB
-    #
-
-    # Get the UUID
-    blkid -s none
-    local UUID=`blkid -s UUID -o value /dev/${DD}1`
-    local LINE=""
-
-    if [ -z "$UUID" ]; then
-        # Fall back to disk
-        LINE="$/dev/${DD}1\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
-    else
-        # Use UUID
-        LINE="UUID=$UUID\t$MOUNT\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1 2"
-    fi
-
-    Log "Adding '$LINE' to FSTAB"
-    echo -e "$LINE" >> /etc/fstab
-
-    # mount
-    mount $MOUNT
-    check_error $? "Could not mount $DD to $MOUNT"
 }
 
 ############################################################
@@ -278,13 +285,21 @@ install_hadoop () {
 
     # Update hadoop configuration
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/core-site.xml
-    sed -i -e "s+MOUNT_LOCATION+$MOUNT+g" $HADOOP_HOME/etc/hadoop/core-site.xml
+    for D in `ls -d -1 /hadoop*`; do
+        sed -i -e "s+MOUNT_LOCATION+$D,MOUNT_LOCATION+g" $HADOOP_HOME/etc/hadoop/core-site.xml
+    done
+    # Remove trailing MOUNT_LOCATION
+    sed -i -e "s+,MOUNT_LOCATION++g" $HADOOP_HOME/etc/hadoop/core-site.xml
+
 
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+    sed -i -e "s+DATA_REPLICATION+$DATA_REPLICATION+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
 
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/yarn-site.xml
 
     sed -i -e "s+\${JAVA_HOME}+'$JAVA_HOME'+g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh
+
+
 
     #
     # Global profile environment variables
@@ -300,8 +315,10 @@ install_hadoop () {
     chmod -R g=u $HADOOP_HOME
 
     # HDFS user and hadoop group owns everything on the data disk
-    chown hdfs:hadoop -R $MOUNT
-    chmod -R g=u $MOUNT
+    for D in `ls -d -1 /hadoop*`; do
+        chown hdfs:hadoop -R $D
+        chmod -R g=u $D
+    done
 }
 
 

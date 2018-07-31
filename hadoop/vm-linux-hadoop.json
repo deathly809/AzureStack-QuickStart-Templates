@@ -100,10 +100,18 @@
         "dataDiskSize": {
             "type": "int",
             "defaultValue": 512,
-            "minValue": 128,
+            "minValue": 16,
             "maxValue": 1024,
             "metadata": {
                 "description": "Size of the attached data disks in GB."
+            }
+        },
+        "dataReplication": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "metadata": {
+                "description": "How many copies of the data in Hadoop."
             }
         },
         "batchSize": {

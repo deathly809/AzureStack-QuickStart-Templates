@@ -21,6 +21,9 @@
         "dataDiskSize": {
             "type": "int"
         },
+        "dataReplication": {
+            "type": "int"
+        },
         "storageAccountName": {
             "type": "string"
         },
@@ -185,7 +188,7 @@
                         "[concat(parameters('baseURI'),'/config/mapred-site.xml')]",
                         "[concat(parameters('baseURI'),'/config/yarn-site.xml')]"
                     ],
-                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'))]"
+                    "commandToExecute": "[concat('bash ./hadoopSetup.sh ',parameters('numberWorkerNodes'),' ',parameters('dataReplication'))]"
                 }
             }
         }
