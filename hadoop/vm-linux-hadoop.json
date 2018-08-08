@@ -92,7 +92,6 @@
             "type": "int",
             "defaultValue": 4,
             "minValue": 1,
-            "maxValue": 32,
             "metadata": {
                 "description": "The number of worker nodes in the cluster."
             }
@@ -426,9 +425,6 @@
                     },
                     "baseURI": {
                         "value": "[variables('baseURI')]"
-                    },
-                    "batchSize": {
-                        "value": "[parameters('batchSize')]"
                     }
                 }
             }

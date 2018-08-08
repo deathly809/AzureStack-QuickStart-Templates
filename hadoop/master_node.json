@@ -35,11 +35,6 @@
         },
         "baseURI": {
             "type": "string"
-        },
-        "batchSize": {
-            "type": "int",
-            "minValue": 1,
-            "maxValue": 40
         }
     },
     "variables": {
