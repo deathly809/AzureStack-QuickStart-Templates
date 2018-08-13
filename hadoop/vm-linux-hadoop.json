@@ -113,6 +113,13 @@
             "metadata": {
                 "description": "How many resources to attempt to deploy at once."
             }
+        },
+        "baseUri": {
+            "type": "string",
+            "defaultValue": "https://raw.githubusercontent.com/deathly809/AzureStack-QuickStart-Templates/hadoop/hadoop",
+            "metadata": {
+                "description": "Base URI for scripts and files."
+            }
         }
     },
     "variables": {
@@ -126,8 +133,7 @@
         "networkSecurityGroupName": "[tolower(concat(variables('defaultName'),'nsg'))]",
         "subnetName": "[concat(variables('defaultName'),'sub')]",
         "virtualNetworkName": "[concat(variables('defaultName'),'vnet')]",
-        "loadBalancerName": "[concat(variables('defaultName'),'lb')]",
-        "baseURI": "https://raw.githubusercontent.com/deathly809/AzureStack-QuickStart-Templates/hadoop/hadoop"
+        "loadBalancerName": "[concat(variables('defaultName'),'lb')]"
     },
     "resources": [
         {
@@ -335,7 +341,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('baseURI'),'/worker_node.json')]",
+                    "uri": "[concat(parameters('baseURI'),'/worker_node.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -370,7 +376,7 @@
                         "value": "[variables('networkSecurityGroupName')]"
                     },
                     "baseURI": {
-                        "value": "[variables('baseURI')]"
+                        "value": "[parameters('baseURI')]"
                     },
                     "batchSize": {
                         "value": "[parameters('batchSize')]"
@@ -389,7 +395,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('baseURI'),'/master_node.json')]",
+                    "uri": "[concat(parameters('baseURI'),'/master_node.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -424,7 +430,7 @@
                         "value": "[parameters('numberWorkerNodes')]"
                     },
                     "baseURI": {
-                        "value": "[variables('baseURI')]"
+                        "value": "[parameters('baseURI')]"
                     }
                 }
             }
@@ -440,7 +446,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('baseURI'),'/jumpbox_node.json')]",
+                    "uri": "[concat(parameters('baseURI'),'/jumpbox_node.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -475,7 +481,7 @@
                         "value": "[variables('loadBalancerName')]"
                     },
                     "baseURI": {
-                        "value": "[variables('baseURI')]"
+                        "value": "[parameters('baseURI')]"
                     }
                 }
             }
