@@ -85,13 +85,22 @@ HADOOP_HOME=/usr/local/hadoop
 # Get the role of this node
 ROLE=`hostname`
 
-
 ############################################################
 #
 # 	Install pre-reqs
 #
 #
 preinstall () {
+    # Add mirrors,
+
+    # Create backup
+    SOURCES='/etc/apt/sources.list'
+    cp "$SOURCES" "$SOURCES.bak"
+    echo 'deb mirror://mirrors.ubuntu.com/mirrors.txt precise main restricted universe multiverse'              | cat - $SOURCES > /tmp/sources.list && mv /tmp/sources.list $SOURCES
+    echo 'deb mirror://mirrors.ubuntu.com/mirrors.txt precise-updates main restricted universe multiverse'      | cat - $SOURCES > /tmp/sources.list && mv /tmp/sources.list $SOURCES
+    echo 'deb mirror://mirrors.ubuntu.com/mirrors.txt precise-backports main restricted universe multiverse'    | cat - $SOURCES > /tmp/sources.list && mv /tmp/sources.list $SOURCES
+    echo 'deb mirror://mirrors.ubuntu.com/mirrors.txt precise-security main restricted universe multiverse'     | cat - $SOURCES > /tmp/sources.list && mv /tmp/sources.list $SOURCES
+
     # Java Runtime Environment
     apt-get update > /dev/null
     DEBIAN_FRONTEND=noninteractive apt-get install --yes --quiet default-jre htop sshpass > /dev/null
