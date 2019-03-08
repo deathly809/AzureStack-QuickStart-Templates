@@ -175,14 +175,21 @@ attach_disks () {
     # Locate the datadisk
     #
     DISKS=($(scan_for_new_disks))
-    PARTLIST=""
-    NUM_DISKS=0
 
     echo "Disks are ${DISKS[@]}"
 
+    HADOOP_DATA_DIR=""
+
+    mkdir $MOUNT
+
     for DISK in "${DISKS[@]}";
     do
-        NUM_DISKS=$((NUM_DISKS + 1))
+        # if previous stuff, add a comma
+        if [ -n "$HADOOP_DATA_DIR" ]
+        then
+            HADOOP_DATA_DIR="$HADOOP_DATA_DIR,"
+        fi
+
         echo "Working on ${DISK}"
         is_partitioned ${DISK}
         if [ ${?} -ne 0 ];
@@ -190,27 +197,40 @@ attach_disks () {
             echo "${DISK} is not partitioned, partitioning"
             do_partition ${DISK}
         fi
-        PARTITION=$(fdisk -l ${DISK}|grep -A 1 Device|tail -n 1|awk '{print $1}')
-        MOUNTPOINT=${PARTITION}
-        PARTLIST="${PARTLIST} ${PARTITION}"
-        echo "Next mount point appears to be ${MOUNTPOINT}"
+
+        # Partition (/dev/[a-z]#)
+        PARTITION=$(fdisk -l ${DISK} | grep -A 1 Device|tail -n 1|awk '{print $1}')
+
+        # Random debugging output
+        echo "Next mount point appears to be ${PARTITION}"
         echo "Partition ${PARTITION}"
         read UUID UNUSED < <(blkid -u filesystem ${PARTITION}|awk -F "[= ]" '{print $3" "$5}'|tr -d "\"")
-        echo -e "\t${UUID}\t${MOUNTPOINT}\t${UNUSED}"
+        echo -e "\t${UUID}\t${PARTITION}\t${UNUSED}"
+
+        # append this: /hadoop/dev/sd[a-z]#
+        MOUNT_LOCATION="$MOUNT$PARTITION"
+
+        # Make FileSystem
+        mkfs -t ext4 ${PARTITION}
+
+        # Add to FSTAB
+        echo "$PARTITION $MOUNT_LOCATION   ext4 defaults,nofail  0   2" >> /etc/fstab
+
+        # Add mount location to the property placed in hadoop
+        HADOOP_DATA_DIR="$HADOOP_DATA_DIR$MOUNT_LOCATION"
+
+        # Create mount location
+        mkdir -p $MOUNT_LOCATION
     done
 
-    echo "PARTLIST = ${PARTLIST}"
-
-    echo "Create software raid array"
-    mkdir $MOUNT
-    mdadm --create /dev/md127 --level 0 --raid-devices $NUM_DISKS ${PARTLIST##*( )}
-    mkfs -t ext4 /dev/md127
-    echo "/dev/md127 $MOUNT   ext4 defaults,nofail  0   2" >> /etc/fstab
+    echo "Mounting"
     mount -a
     mount
 
+    echo "Disk free"
     df -BG
 
+    # Should change to hadoop, but data is behind a username/password
     chmod -R 0777 $MOUNT
 }
 
@@ -303,6 +323,8 @@ install_hadoop () {
 
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
     sed -i -e "s+REPLICATION+$REPLICATION+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+    sed -i -e "s+HADOOP_DATA_DIR+$HADOOP_DATA_DIR+g" $HADOOP_HOME/etc/hadoop/hdfs-site.xml
+
 
     sed -i -e "s+CLUSTER_NAME+$CLUSTER_NAME+g" $HADOOP_HOME/etc/hadoop/yarn-site.xml
 
