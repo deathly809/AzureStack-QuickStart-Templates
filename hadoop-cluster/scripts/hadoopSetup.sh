@@ -446,10 +446,10 @@ setup_node () {
 
     }
 
-    echo -e '* soft nofile 65536' >> /etc/security/limits.conf
-    echo -e '* hard nofile 65536' >> /etc/security/limits.conf
-    echo -e '* soft nproc 65536' >> /etc/security/limits.conf
-    echo -e '* hard nproc 65536' >> /etc/security/limits.conf
+    echo -e 'hadoop soft nofile 65536' >> /etc/security/limits.conf
+    echo -e 'hadoop hard nofile 65536' >> /etc/security/limits.conf
+    echo -e 'hadoop soft nproc 65536' >> /etc/security/limits.conf
+    echo -e 'hadoop hard nproc 65536' >> /etc/security/limits.conf
 
     echo -e '
 if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
